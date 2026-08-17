@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atmospheric Shield - Initializing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#00285d",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary": "#ffb95f",
+                        "on-primary": "#002e6a",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface": "#10131a",
+                        "surface-bright": "#363941",
+                        "on-surface": "#e1e2ec",
+                        "surface-dim": "#10131a",
+                        "surface-container-high": "#272a31",
+                        "background": "#10131a",
+                        "outline-variant": "#424754",
+                        "on-primary-fixed-variant": "#004395",
+                        "inverse-on-surface": "#2e3038",
+                        "on-error": "#690005",
+                        "surface-container-low": "#191b23",
+                        "on-tertiary": "#472a00",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error-container": "#ffdad6",
+                        "on-surface-variant": "#c2c6d6",
+                        "surface-container": "#1d2027",
+                        "surface-container-lowest": "#0b0e15",
+                        "on-secondary": "#233143",
+                        "surface-container-highest": "#32353c",
+                        "secondary": "#b9c8de",
+                        "inverse-surface": "#e1e2ec",
+                        "secondary-container": "#39485a",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "tertiary-fixed": "#ffddb8",
+                        "surface-tint": "#adc6ff",
+                        "on-secondary-container": "#a7b6cc",
+                        "inverse-primary": "#005ac2",
+                        "on-tertiary-fixed": "#2a1700",
+                        "secondary-fixed": "#d4e4fa",
+                        "primary-container": "#4d8eff",
+                        "surface-variant": "#32353c",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "tertiary-container": "#ca8100",
+                        "on-background": "#e1e2ec",
+                        "primary": "#adc6ff",
+                        "outline": "#8c909f",
+                        "on-tertiary-container": "#3e2400",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-secondary-fixed": "#0d1c2d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "container-margin": "20px",
+                        "xl": "32px",
+                        "sm": "12px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "title-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #10131a;
+        }
+        
+        .splash-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            background-image: url('https://lh3.googleusercontent.com/aida/AP1WRLtKlRzi6O8tr2AmPte3OLqkNcyqRFAGzvQ6KEktes6mJ_yos6Eb6sPdXH7omQxA3gzgDhBXI_AVTusSssEkwZE96EXnbZ_PxfxNrJxvngDva_QiQmuIJjt7b7wFEZGU1CmUYKgdzor4q3ysaDJ6PY-sL-d60_Tj9vAFXnXDXGGkUFRoRtXeuAmOOKpKQiIkZs9752jk64-yD6YDwMRn6I8LSkspyr9ElHIULgxVSekKP1Grm0qIkcnQYcUL');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .glow-text {
+            text-shadow: 0 0 12px rgba(173, 198, 255, 0.6), 0 0 24px rgba(173, 198, 255, 0.2);
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { 
+                opacity: 0.3;
+                transform: scale(0.8);
+                box-shadow: 0 0 0px rgba(173, 198, 255, 0);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.1);
+                box-shadow: 0 0 8px rgba(173, 198, 255, 0.8);
+            }
+        }
+
+        .loading-dot {
+            width: 4px;
+            height: 4px;
+            background-color: #adc6ff;
+            border-radius: 50%;
+            animation: pulse-dot 1.5s infinite ease-in-out;
+        }
+
+        .dot-1 { animation-delay: 0s; }
+        .dot-2 { animation-delay: 0.2s; }
+        .dot-3 { animation-delay: 0.4s; }
+
+        /* Scanline effect overlay */
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(173, 198, 255, 0.03) 50%,
+                rgba(0, 0, 0, 0) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.15;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="dark bg-background selection:bg-primary/30">
+<main class="splash-container">
+<!-- Subtle Scanline Atmosphere -->
+<div class="scanline"></div>
+<!-- Minimal Loading Status -->
+<div class="mb-xl md:mb-32 flex flex-col items-center gap-base">
+<div class="flex items-center gap-xs mb-xs">
+<span class="font-label-caps text-label-caps text-primary tracking-[0.25em] glow-text">
+                    INITIALIZING
+                </span>
+<!-- Staggered Pulsing Dots -->
+<div class="flex gap-[4px] items-center h-4">
+<div class="loading-dot dot-1"></div>
+<div class="loading-dot dot-2"></div>
+<div class="loading-dot dot-3"></div>
+</div>
+</div>
+<!-- Progress Bar Rail -->
+<div class="w-32 h-[2px] bg-outline-variant/20 rounded-full mt-lg overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full bg-primary shadow-[0_0_8px_rgba(173,198,255,0.8)] w-0 transition-all duration-300 ease-out" id="progress-bar"></div>
+</div>
+</div>
+</main>
+<script>
+        // Simple loading simulation to enhance the "High-Tech" feel
+        window.addEventListener('DOMContentLoaded', () => {
+            const progressBar = document.getElementById('progress-bar');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 8;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    // Add a slight completion glow
+                    progressBar.style.boxShadow = "0 0 15px rgba(173, 198, 255, 1)";
+                }
+                progressBar.style.width = `${progress}%`;
+            }, 150);
+        });
+    </script>
+</body></html>

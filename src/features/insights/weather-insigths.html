@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FRONT YARD | Weather &amp; AI Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#a7b6cc",
+                    "on-tertiary": "#472a00",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-error-container": "#ffdad6",
+                    "background": "#10131a",
+                    "tertiary-container": "#ca8100",
+                    "outline-variant": "#424754",
+                    "surface-container-highest": "#32353c",
+                    "surface": "#10131a",
+                    "error-container": "#93000a",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#00285d",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed": "#2a1700",
+                    "on-background": "#e1e2ec",
+                    "on-surface-variant": "#c2c6d6",
+                    "tertiary": "#ffb95f",
+                    "inverse-on-surface": "#2e3038",
+                    "primary": "#adc6ff",
+                    "secondary": "#b9c8de",
+                    "inverse-surface": "#e1e2ec",
+                    "surface-tint": "#adc6ff",
+                    "surface-dim": "#10131a",
+                    "surface-container-high": "#272a31",
+                    "inverse-primary": "#005ac2",
+                    "secondary-fixed": "#d4e4fa",
+                    "primary-container": "#4d8eff",
+                    "primary-fixed": "#d8e2ff",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-surface": "#e1e2ec",
+                    "surface-container-lowest": "#0b0e15",
+                    "tertiary-fixed": "#ffddb8",
+                    "outline": "#8c909f",
+                    "on-secondary-fixed-variant": "#39485a",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container": "#1d2027",
+                    "secondary-fixed-dim": "#b9c8de",
+                    "on-primary-fixed": "#001a42",
+                    "on-secondary": "#233143",
+                    "on-secondary-fixed": "#0d1c2d",
+                    "secondary-container": "#39485a",
+                    "on-tertiary-container": "#3e2400",
+                    "on-primary": "#002e6a",
+                    "surface-container-low": "#191b23",
+                    "surface-variant": "#32353c",
+                    "surface-bright": "#363941"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "md": "16px",
+                    "gutter": "16px",
+                    "base": "4px",
+                    "sm": "12px",
+                    "xs": "8px",
+                    "container-margin": "20px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "title-md": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "display-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #10131a;
+            color: #e1e2ec;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .status-ring-gradient {
+            background: conic-gradient(#3B82F6 85%, transparent 0);
+        }
+        .pulse-glow {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.05); }
+        }
+        .chart-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 2s ease-out forwards;
+        }
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="pb-24 pt-20">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-container-margin py-base bg-surface/80 dark:bg-surface/80 backdrop-blur-xl">
+<div class="flex items-center gap-sm">
+<button class="hover:bg-surface-container-highest/20 transition-colors p-2 rounded-full active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">grid_view</span>
+</button>
+<h1 class="text-title-md font-title-md font-bold tracking-tight text-on-surface dark:text-on-surface">FRONT YARD</h1>
+</div>
+<div class="flex items-center gap-sm">
+<button class="hover:bg-surface-container-highest/20 transition-colors p-2 rounded-full active:scale-95 duration-150 relative">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-background"></span>
+</button>
+</div>
+</header>
+<main class="px-container-margin space-y-lg">
+<!-- Weather & Rain Forecast Section -->
+<section class="glass-panel p-md rounded-xl relative overflow-hidden">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h2 class="font-label-caps text-label-caps text-on-surface-variant mb-1">CURRENT WEATHER</h2>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-3xl">partly_cloudy_day</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile">22°C</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">Partly Cloudy</p>
+</div>
+<div class="text-right">
+<span class="material-symbols-outlined text-on-tertiary-container bg-tertiary-container/20 p-2 rounded-full">umbrella</span>
+</div>
+</div>
+<div class="mt-md">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-base">RAIN FORECAST (4H)</h3>
+<div class="h-24 w-full relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 100">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#3B82F6" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#3B82F6" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,80 Q50,75 100,60 T200,85 T300,40 T400,10 L400,100 L0,100 Z" fill="url(#chartGradient)"></path>
+<path class="chart-path" d="M0,80 Q50,75 100,60 T200,85 T300,40 T400,10" fill="none" stroke="#3B82F6" stroke-width="2"></path>
+</svg>
+<div class="flex justify-between mt-1 text-[10px] text-on-surface-variant font-medium">
+<span>NOW</span>
+<span>+1H</span>
+<span>+2H</span>
+<span>+3H</span>
+<span>+4H</span>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Assistant Recommendation -->
+<section class="bg-primary-container/20 border border-primary/20 p-md rounded-xl flex gap-md items-start animate-pulse-slow">
+<div class="bg-primary-container text-on-primary-container p-2 rounded-lg">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div class="flex-1">
+<p class="text-body-sm text-on-surface leading-tight">
+<span class="font-bold text-primary">AI Insight:</span> Rain probability is increasing. I recommend enabling <span class="underline decoration-primary">Automatic Mode</span> for the next 2 hours.
+                </p>
+<button class="mt-sm bg-primary text-on-primary px-md py-xs rounded-full font-label-caps text-label-caps hover:brightness-110 active:scale-95 transition-all">
+                    ENABLE AUTO MODE
+                </button>
+</div>
+</section>
+<!-- Bento Grid for Data Cards -->
+<div class="grid grid-cols-2 gap-md">
+<!-- Clothes Detection -->
+<div class="col-span-2 glass-panel rounded-xl overflow-hidden flex flex-col">
+<div class="p-md pb-0 flex justify-between items-center">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant">CLOTHES DETECTION</h3>
+<span class="bg-tertiary/20 text-tertiary text-[10px] px-2 py-0.5 rounded-full font-bold">LIVE FEED</span>
+</div>
+<div class="m-md mt-sm rounded-lg overflow-hidden h-40 relative">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="A high-definition security camera view of an outdoor laundry drying rack at dusk. Three items of clothing are hanging neatly, highlighted with a subtle blue digital bounding box overlay. The lighting is cinematic and moody, with a deep slate sky and soft technological blue glows. Professional IoT interface aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCbdTfAL7pcNcnljcfV221W8ItyllEGsP-TaYLPAxNO7XeSLk7O7ovdA3VxpV-eblj-Z6iiG485Idrxk99MFwnsFsIKkx12vu1-t3yL3PLE-AFP6fOOexruPAf1wOPK-Qx1IHJrGUMekPYkQk69NCS6abhNYy6KGQvKfBuhVgg30m_uCdaidJBmcfnPqfFukwOLl9VIJcfPPUap_LdtOXlQYCdulxdpMpqgfY0KlHbjQ7DJjz9V0LLgbA')"></div>
+<div class="absolute bottom-0 left-0 w-full p-xs bg-surface/60 backdrop-blur-md flex justify-between items-center">
+<span class="text-[11px] font-bold text-on-surface">3 Garments detected</span>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+<span class="text-[11px] text-green-400 font-bold">Fully Covered</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Dryness Estimation -->
+<div class="glass-panel p-md rounded-xl flex flex-col items-center justify-center text-center">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-sm">DRYNESS</h3>
+<div class="relative w-20 h-20 mb-sm">
+<div class="absolute inset-0 rounded-full border-4 border-surface-container-highest"></div>
+<div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent border-r-transparent transform rotate-45"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-title-md font-bold text-primary">85%</span>
+</div>
+<div class="absolute inset-0 pulse-glow bg-primary/20 rounded-full -z-10"></div>
+</div>
+<p class="text-body-sm font-bold text-on-surface">Almost Dry</p>
+</div>
+<!-- Maintenance Insights -->
+<div class="glass-panel p-md rounded-xl">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-sm">MAINTENANCE</h3>
+<div class="space-y-sm">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-sm">settings_slow_motion</span>
+<p class="text-[11px] text-on-surface-variant">Motor: <span class="text-on-surface font-bold">Stable</span></p>
+</div>
+<div class="p-xs bg-surface-container rounded-lg border border-outline-variant/30">
+<p class="text-[11px] text-on-surface-variant leading-tight">Next service in <span class="text-tertiary font-bold">45 days</span></p>
+</div>
+<button class="w-full py-1 text-[10px] font-bold text-primary uppercase tracking-wider border border-primary/30 rounded hover:bg-primary/10 transition-colors">
+                        Details
+                    </button>
+</div>
+</div>
+</div>
+<!-- Weekly Analytics -->
+<section class="glass-panel p-md rounded-xl">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">Analytics: Rain vs Protection</h2>
+<div class="h-48 w-full flex items-end justify-between gap-2 px-1">
+<!-- Simple bar representation for last week -->
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex flex-col-reverse gap-0.5 h-32">
+<div class="w-full bg-primary/40 rounded-t-sm" style="height: 40%;"></div>
+<div class="w-full bg-tertiary/60 rounded-t-sm" style="height: 30%;"></div>
+</div>
+<span class="text-[9px] font-bold text-on-surface-variant">MON</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex flex-col-reverse gap-0.5 h-32">
+<div class="w-full bg-primary/40 rounded-t-sm" style="height: 60%;"></div>
+<div class="w-full bg-tertiary/60 rounded-t-sm" style="height: 50%;"></div>
+</div>
+<span class="text-[9px] font-bold text-on-surface-variant">TUE</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex flex-col-reverse gap-0.5 h-32">
+<div class="w-full bg-primary/40 rounded-t-sm" style="height: 20%;"></div>
+<div class="w-full bg-tertiary/60 rounded-t-sm" style="height: 20%;"></div>
+</div>
+<span class="text-[9px] font-bold text-on-surface-variant">WED</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex flex-col-reverse gap-0.5 h-32">
+<div class="w-full bg-primary/40 rounded-t-sm" style="height: 85%;"></div>
+<div class="w-full bg-tertiary/60 rounded-t-sm" style="height: 80%;"></div>
+</div>
+<span class="text-[9px] font-bold text-on-surface-variant">THU</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex flex-col-reverse gap-0.5 h-32">
+<div class="w-full bg-primary/40 rounded-t-sm" style="height: 30%;"></div>
+<div class="w-full bg-tertiary/60 rounded-t-sm" style="height: 25%;"></div>
+</div>
+<span class="text-[9px] font-bold text-on-surface-variant">FRI</span>
+</div>
+<div class="flex-1 flex flex-col-center gap-2">
+<div class="w-full flex flex-col-reverse gap-0.5 h-32">
+<div class="w-full bg-primary/40 rounded-t-sm" style="height: 10%;"></div>
+<div class="w-full bg-tertiary/60 rounded-t-sm" style="height: 5%;"></div>
+</div>
+<span class="text-[9px] font-bold text-on-surface-variant">SAT</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex flex-col-reverse gap-0.5 h-32">
+<div class="w-full bg-primary/40 rounded-t-sm" style="height: 50%;"></div>
+<div class="w-full bg-tertiary/60 rounded-t-sm" style="height: 45%;"></div>
+</div>
+<span class="text-[9px] font-bold text-on-surface-variant">SUN</span>
+</div>
+</div>
+<div class="flex justify-center gap-lg mt-md">
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 bg-primary/40 rounded-full"></span>
+<span class="text-[10px] text-on-surface-variant">Rain Events</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 bg-tertiary/60 rounded-full"></span>
+<span class="text-[10px] text-on-surface-variant">Deployments</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface/90 dark:bg-surface/90 backdrop-blur-lg rounded-t-xl shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 transition-colors">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-caps font-label-caps">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 transition-colors">
+<span class="material-symbols-outlined">settings_remote</span>
+<span class="text-label-caps font-label-caps">Remote</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 transition-colors">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-caps font-label-caps">History</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-xs py-base shadow-[0_0_12px_rgba(77,142,255,0.3)] scale-90">
+<span class="material-symbols-outlined">psychology</span>
+<span class="text-label-caps font-label-caps">Insights</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.add('scale-95');
+                setTimeout(() => this.classList.remove('scale-95'), 150);
+            });
+        });
+    </script>
+</body></html>

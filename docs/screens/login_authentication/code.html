@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - URAN Smart Protection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#39485a",
+                    "surface-container": "#1d2027",
+                    "on-background": "#e1e2ec",
+                    "inverse-on-surface": "#2e3038",
+                    "surface-container-lowest": "#0b0e15",
+                    "primary-container": "#4d8eff",
+                    "primary": "#adc6ff",
+                    "secondary-fixed": "#d4e4fa",
+                    "on-primary-fixed-variant": "#004395",
+                    "on-error": "#690005",
+                    "on-surface": "#e1e2ec",
+                    "error": "#ffb4ab",
+                    "secondary": "#b9c8de",
+                    "tertiary-container": "#ca8100",
+                    "surface-dim": "#10131a",
+                    "on-secondary-container": "#a7b6cc",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#233143",
+                    "secondary-fixed-dim": "#b9c8de",
+                    "surface-container-highest": "#32353c",
+                    "inverse-primary": "#005ac2",
+                    "on-primary-fixed": "#001a42",
+                    "surface-variant": "#32353c",
+                    "inverse-surface": "#e1e2ec",
+                    "on-primary": "#002e6a",
+                    "surface-tint": "#adc6ff",
+                    "on-primary-container": "#00285d",
+                    "background": "#10131a",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-tertiary-container": "#3e2400",
+                    "error-container": "#93000a",
+                    "surface-container-low": "#191b23",
+                    "on-secondary-fixed": "#0d1c2d",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "on-surface-variant": "#c2c6d6",
+                    "outline-variant": "#424754",
+                    "on-tertiary": "#472a00",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "surface": "#10131a",
+                    "tertiary-fixed": "#ffddb8",
+                    "surface-bright": "#363941",
+                    "outline": "#8c909f",
+                    "secondary-container": "#39485a",
+                    "surface-container-high": "#272a31",
+                    "primary-fixed": "#d8e2ff",
+                    "on-tertiary-fixed": "#2a1700",
+                    "tertiary": "#ffb95f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "sm": "12px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "container-margin": "20px",
+                    "base": "4px",
+                    "lg": "24px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "title-md": ["Inter"],
+                    "display-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #10131a;
+            color: #e1e2ec;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #4d8eff 0%, #2563eb 100%);
+        }
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(77, 142, 255, 0.2);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .auth-input:focus {
+            outline: none;
+            border-color: #4d8eff;
+            box-shadow: 0 0 0 2px rgba(77, 142, 255, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col justify-center items-center relative p-container-margin">
+<!-- Atmospheric Background Shader -->
+<div class="fixed inset-0 z-0">
+<div class="absolute inset-0 bg-[#0F172A]"></div>
+<div class="absolute inset-0 opacity-40" style="background-image: radial-gradient(circle at 50% 50%, #1E293B 0%, transparent 70%);"></div>
+<!-- Simulated animated background -->
+<div class="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-primary/10 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-tertiary/5 blur-[100px]"></div>
+</div>
+<!-- Main Login Container -->
+<main class="relative z-10 w-full max-w-[400px] flex flex-col items-center">
+<!-- Logo Section -->
+<header class="mb-xl text-center">
+<div class="inline-flex items-center justify-center p-md bg-surface-container-high rounded-full mb-md glass-panel glow-effect">
+<span class="material-symbols-outlined text-[40px] text-primary" data-icon="grid_view">grid_view</span>
+</div>
+<h1 class="text-on-surface font-title-md text-title-md font-extrabold tracking-tight mb-base">URAN</h1>
+<p class="text-on-surface-variant font-label-caps text-label-caps uppercase tracking-widest">Atmospheric Shield</p>
+</header>
+<!-- Login Form Card -->
+<section class="w-full glass-panel rounded-xl p-lg shadow-2xl">
+<div class="mb-lg">
+<h2 class="text-on-surface font-headline-lg-mobile text-headline-lg-mobile mb-xs">Welcome Back</h2>
+<p class="text-on-surface-variant font-body-sm text-body-sm">Secure access to your smart protection system</p>
+</div>
+<form class="space-y-md" onsubmit="event.preventDefault();">
+<!-- Email Field -->
+<div class="space-y-base">
+<label class="block font-label-caps text-label-caps text-on-surface-variant ml-xs">Email address</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[20px]" data-icon="mail">mail</span>
+</div>
+<input class="auth-input w-full bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg py-md pl-[48px] pr-md transition-all font-body-lg text-body-lg placeholder:text-outline-variant/60" placeholder="name@example.com" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-base">
+<label class="block font-label-caps text-label-caps text-on-surface-variant ml-xs">Password</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
+</div>
+<input class="auth-input w-full bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg py-md pl-[48px] pr-md transition-all font-body-lg text-body-lg placeholder:text-outline-variant/60" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Primary Login Button -->
+<button class="w-full primary-gradient text-on-primary-container font-title-md text-title-md font-bold py-md rounded-lg active:scale-[0.98] transition-transform glow-effect mt-xs">
+                    Log In
+                </button>
+</form>
+<!-- Divider -->
+<div class="relative flex items-center justify-center my-lg">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="mx-md text-on-surface-variant font-label-caps text-label-caps bg-transparent">Or continue with</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<!-- Social Login -->
+<button class="w-full bg-surface-container-high border border-outline-variant hover:bg-surface-variant text-on-surface font-label-caps text-label-caps py-md rounded-lg flex items-center justify-center gap-md transition-colors active:scale-[0.98]">
+<div class="w-5 h-5 flex items-center justify-center">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+</div>
+                Sign in with Google
+            </button>
+</section>
+<!-- Footer Links -->
+<footer class="mt-lg text-center space-y-md">
+<a class="block text-primary font-body-sm text-body-sm hover:underline" href="#">Forgot Password?</a>
+<p class="text-on-surface-variant font-body-sm text-body-sm">
+                Don't have an account? 
+                <a class="text-primary font-semibold hover:underline" href="#">Sign up</a>
+</p>
+<div class="pt-lg flex flex-col items-center gap-xs opacity-40">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]" data-icon="cloud">cloud</span>
+<span class="font-label-caps text-[10px] tracking-widest">POWERED BY FIREBASE INFRASTRUCTURE</span>
+</div>
+<p class="font-label-caps text-[10px] tracking-[0.2em] uppercase">Secured by Atmospheric Shield v2.4</p>
+</div>
+</footer>
+</main>
+<!-- Glassmorphic Decorative Orbs -->
+<div class="fixed top-20 left-1/4 w-32 h-32 bg-primary/20 rounded-full blur-[40px] mix-blend-screen pointer-events-none"></div>
+<div class="fixed bottom-40 right-1/4 w-48 h-48 bg-secondary/10 rounded-full blur-[60px] mix-blend-screen pointer-events-none"></div>
+<script>
+        // Micro-interaction for the logo
+        const logo = document.querySelector('header .material-symbols-outlined');
+        if(logo) {
+            logo.addEventListener('mouseenter', () => {
+                logo.style.transform = 'scale(1.1) rotate(5deg)';
+                logo.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            });
+            logo.addEventListener('mouseleave', () => {
+                logo.style.transform = 'scale(1) rotate(0deg)';
+            });
+        }
+
+        // Add subtle focus glow to card on input focus
+        const inputs = document.querySelectorAll('.auth-input');
+        const card = document.querySelector('.glass-panel');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                card.style.boxShadow = '0 0 40px rgba(77, 142, 255, 0.15)';
+                card.style.transition = 'box-shadow 0.5s ease';
+            });
+            input.addEventListener('blur', () => {
+                card.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.5)';
+            });
+        });
+    </script>
+</body></html>

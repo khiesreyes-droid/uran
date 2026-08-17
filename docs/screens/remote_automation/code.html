@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Front Yard - Remote Control &amp; Automation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .active-glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: #1d2027;
+            border-radius: 3px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #adc6ff;
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 0 10px rgba(173, 198, 255, 0.4);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-container": "#a7b6cc",
+                      "on-tertiary": "#472a00",
+                      "primary-fixed-dim": "#adc6ff",
+                      "on-error-container": "#ffdad6",
+                      "background": "#10131a",
+                      "tertiary-container": "#ca8100",
+                      "outline-variant": "#424754",
+                      "surface-container-highest": "#32353c",
+                      "surface": "#10131a",
+                      "error-container": "#93000a",
+                      "tertiary-fixed-dim": "#ffb95f",
+                      "error": "#ffb4ab",
+                      "on-primary-container": "#00285d",
+                      "on-error": "#690005",
+                      "on-tertiary-fixed": "#2a1700",
+                      "on-background": "#e1e2ec",
+                      "on-surface-variant": "#c2c6d6",
+                      "tertiary": "#ffb95f",
+                      "inverse-on-surface": "#2e3038",
+                      "primary": "#adc6ff",
+                      "secondary": "#b9c8de",
+                      "inverse-surface": "#e1e2ec",
+                      "surface-tint": "#adc6ff",
+                      "surface-dim": "#10131a",
+                      "surface-container-high": "#272a31",
+                      "inverse-primary": "#005ac2",
+                      "secondary-fixed": "#d4e4fa",
+                      "primary-container": "#4d8eff",
+                      "primary-fixed": "#d8e2ff",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "on-surface": "#e1e2ec",
+                      "surface-container-lowest": "#0b0e15",
+                      "tertiary-fixed": "#ffddb8",
+                      "outline": "#8c909f",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "on-primary-fixed-variant": "#004395",
+                      "surface-container": "#1d2027",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "on-primary-fixed": "#001a42",
+                      "on-secondary": "#233143",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "secondary-container": "#39485a",
+                      "on-tertiary-container": "#3e2400",
+                      "on-primary": "#002e6a",
+                      "surface-container-low": "#191b23",
+                      "surface-variant": "#32353c",
+                      "surface-bright": "#363941"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "md": "16px",
+                      "gutter": "16px",
+                      "base": "4px",
+                      "sm": "12px",
+                      "xs": "8px",
+                      "container-margin": "20px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "title-md": ["Inter"],
+                      "label-caps": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "display-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-container-margin py-base bg-surface/80 dark:bg-surface/80 backdrop-blur-xl">
+<button class="p-2 text-primary hover:bg-surface-container-highest/20 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<h1 class="text-title-md font-title-md font-bold tracking-tight text-on-surface dark:text-on-surface">FRONT YARD</h1>
+<button class="p-2 text-primary hover:bg-surface-container-highest/20 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="mt-20 px-container-margin space-y-lg">
+<!-- Animated Visualization Header -->
+<div class="relative h-48 rounded-xl overflow-hidden glass-panel">
+
+<div class="absolute inset-0 flex flex-col justify-end p-md bg-gradient-to-t from-background to-transparent">
+<span class="text-label-caps font-label-caps text-primary uppercase">Status</span>
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile">System Idle</h2>
+<p class="text-body-sm text-on-surface-variant">Monitoring environmental risks</p>
+</div>
+</div>
+<!-- Manual Controls -->
+<section class="space-y-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">settings_remote</span>
+<h3 class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-widest">Manual Override</h3>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<button class="group relative flex flex-col items-center justify-center py-xl glass-panel rounded-xl border-primary/20 hover:border-primary/50 transition-all active:scale-95" onclick="handleAction('deploy')">
+<div class="mb-sm p-4 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'wght' 200;">expand_circle_down</span>
+</div>
+<span class="font-bold tracking-widest text-on-surface">DEPLOY</span>
+</button>
+<button class="group relative flex flex-col items-center justify-center py-xl glass-panel rounded-xl border-outline/20 hover:border-outline/50 transition-all active:scale-95" onclick="handleAction('retract')">
+<div class="mb-sm p-4 bg-surface-container-high rounded-full group-hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl" style="font-variation-settings: 'wght' 200;">keyboard_double_arrow_up</span>
+</div>
+<span class="font-bold tracking-widest text-on-surface">RETRACT</span>
+</button>
+</div>
+</section>
+<!-- Automatic Mode Toggle -->
+<section class="glass-panel rounded-xl p-md flex items-center justify-between">
+<div class="flex-1 pr-md">
+<h3 class="font-bold text-on-surface">Automatic Mode</h3>
+<p class="text-body-sm text-on-surface-variant">Deploy tarpaulin automatically when rain is detected.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-8 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</section>
+<!-- Configuration Sliders -->
+<section class="space-y-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">tune</span>
+<h3 class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-widest">Automation Settings</h3>
+</div>
+<div class="glass-panel rounded-xl p-md space-y-lg">
+<div class="space-y-sm">
+<div class="flex justify-between items-center">
+<span class="text-body-sm font-semibold">Rain Sensitivity</span>
+<span class="text-primary font-bold">Medium</span>
+</div>
+<input class="w-full" type="range" value="50"/>
+</div>
+<div class="space-y-sm">
+<div class="flex justify-between items-center">
+<span class="text-body-sm font-semibold">Deployment Delay</span>
+<span class="text-primary font-bold">15s</span>
+</div>
+<input class="w-full" type="range" value="25"/>
+</div>
+<div class="space-y-sm">
+<div class="flex justify-between items-center">
+<span class="text-body-sm font-semibold">Retraction Delay</span>
+<span class="text-primary font-bold">2m</span>
+</div>
+<input class="w-full" type="range" value="60"/>
+</div>
+</div>
+</section>
+<!-- Schedule Section -->
+<section class="space-y-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<h3 class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-widest">Smart Schedule</h3>
+</div>
+<div class="space-y-sm">
+<div class="glass-panel rounded-xl p-md flex items-center gap-md border-l-4 border-primary">
+<span class="material-symbols-outlined text-primary">wb_sunny</span>
+<div class="flex-1">
+<p class="text-body-sm text-on-surface-variant">Open daily</p>
+<p class="text-title-md font-bold">8:00 AM</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<div class="glass-panel rounded-xl p-md flex items-center gap-md border-l-4 border-outline">
+<span class="material-symbols-outlined text-on-surface-variant">bedtime</span>
+<div class="flex-1">
+<p class="text-body-sm text-on-surface-variant">Close daily</p>
+<p class="text-title-md font-bold">6:30 PM</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Quiet Hours -->
+<section class="glass-panel rounded-xl p-md flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="bg-tertiary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-tertiary">volume_off</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Quiet Hours</h3>
+<p class="text-body-sm text-on-surface-variant">Limit motor speed after 10 PM</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-tertiary"></div>
+</label>
+</section>
+<!-- System Diagnostics -->
+<section class="space-y-sm pb-10">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<h3 class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-widest">Diagnostics</h3>
+</div>
+<div class="grid grid-cols-2 gap-sm">
+<div class="glass-panel rounded-xl p-sm flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-green-400 text-sm">precision_manufacturing</span>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">Motor Health</p>
+<p class="text-body-sm font-bold text-green-400">Excellent</p>
+</div>
+</div>
+<div class="glass-panel rounded-xl p-sm flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">wifi</span>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">Signal</p>
+<p class="text-body-sm font-bold text-primary">Strong</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface/90 dark:bg-surface/90 backdrop-blur-lg rounded-t-xl shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-caps font-label-caps">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-xs py-base shadow-[0_0_12px_rgba(77,142,255,0.3)] scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings_remote</span>
+<span class="text-label-caps font-label-caps">Remote</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-caps font-label-caps">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 transition-colors" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="text-label-caps font-label-caps">Insights</span>
+</a>
+</nav>
+<script>
+        function handleAction(type) {
+            console.log('Action triggered:', type);
+            // Visual feedback
+            const btn = event.currentTarget;
+            btn.classList.add('ring-2', 'ring-primary');
+            setTimeout(() => {
+                btn.classList.remove('ring-2', 'ring-primary');
+            }, 500);
+        }
+
+        // Simple animation for ranges
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const label = e.target.parentElement.querySelector('span:last-child');
+                if (label) {
+                    label.style.transform = 'scale(1.1)';
+                    setTimeout(() => label.style.transform = 'scale(1)', 100);
+                }
+            });
+        });
+    </script>
+</body></html>

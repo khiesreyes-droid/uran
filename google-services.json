@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1072473959382",
+    "project_id": "uran-48e06",
+    "storage_bucket": "uran-48e06.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1072473959382:android:89da47f1ffdfcb5dfbd277",
+        "android_client_info": {
+          "package_name": "com.uran.development"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1072473959382-9qn1tb1f3tmog8kba2hg9f455hig48os.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.uran.development",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "1072473959382-05nieql9ilr2r3aoo0i53a8ko6eefcts.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAL3N99Hj5B5QXlqG9UW11Cy5VzoziSubA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1072473959382-05nieql9ilr2r3aoo0i53a8ko6eefcts.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

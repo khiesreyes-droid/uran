@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Set Open Time</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#32353c",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "tertiary": "#ffb95f",
+                        "on-error": "#690005",
+                        "surface-bright": "#363941",
+                        "on-surface": "#e1e2ec",
+                        "on-tertiary": "#472a00",
+                        "primary-container": "#4d8eff",
+                        "inverse-surface": "#e1e2ec",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "surface": "#10131a",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#1d2027",
+                        "secondary": "#b9c8de",
+                        "surface-variant": "#32353c",
+                        "primary-fixed": "#d8e2ff",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "surface-tint": "#adc6ff",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary": "#adc6ff",
+                        "on-secondary": "#233143",
+                        "tertiary-container": "#ca8100",
+                        "inverse-on-surface": "#2e3038",
+                        "on-background": "#e1e2ec",
+                        "background": "#10131a",
+                        "outline": "#8c909f",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-secondary-container": "#a7b6cc",
+                        "secondary-fixed": "#d4e4fa",
+                        "surface-dim": "#10131a",
+                        "outline-variant": "#424754",
+                        "surface-container-high": "#272a31",
+                        "surface-container-lowest": "#0b0e15",
+                        "surface-container-low": "#191b23",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-container": "#3e2400",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "tertiary-fixed": "#ffddb8",
+                        "inverse-primary": "#005ac2",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#39485a",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-primary": "#002e6a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "12px",
+                        "xl": "32px",
+                        "container-margin": "20px",
+                        "lg": "24px",
+                        "xs": "8px",
+                        "md": "16px",
+                        "gutter": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Time Picker Glow Effect */
+        .time-picker-glow {
+            box-shadow: 0 0 40px rgba(173, 198, 255, 0.15);
+        }
+        
+        /* Glass Panel */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        /* Toggle Switch Custom Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #adc6ff;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: rgba(173, 198, 255, 0.15);
+            box-shadow: 0 0 15px rgba(173, 198, 255, 0.3);
+        }
+        
+        /* Digital Wheel Fade */
+        .wheel-mask {
+            mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-body-lg antialiased">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-50 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_4px_20px_rgba(0,98,255,0.05)]">
+<div class="flex justify-between items-center px-container-margin py-4 max-w-container-max mx-auto">
+<button class="text-primary hover:opacity-80 active:scale-95 transition-all p-2 -ml-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">close</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile tracking-tight text-primary">SET OPEN TIME</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col px-container-margin pt-xl pb-32">
+<!-- Context Text -->
+<div class="text-center mb-xl">
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                Select the time your protective shield will automatically disengage.
+            </p>
+</div>
+<!-- High-Tech Time Picker Container -->
+<div class="glass-panel rounded-xl p-lg mb-xl time-picker-glow relative overflow-hidden flex flex-col items-center justify-center min-h-[300px]">
+<!-- Subtle background accent -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+<div class="flex items-center justify-center space-x-4 wheel-mask h-48 w-full relative z-10">
+<!-- Hours Wheel -->
+<div class="h-full flex flex-col items-center justify-start overflow-hidden w-24 relative select-none">
+<div class="absolute inset-x-0 top-1/2 -mt-6 h-12 border-y border-primary/20 bg-primary/5 pointer-events-none rounded-sm"></div>
+<div class="flex flex-col items-center transform translate-y-[80px] transition-transform duration-300" id="hours-wheel">
+<div class="h-12 flex items-center justify-center font-display-lg text-[32px] text-on-surface-variant/30">05</div>
+<div class="h-12 flex items-center justify-center font-display-lg text-[40px] text-on-surface-variant/60">06</div>
+<div class="h-12 flex items-center justify-center font-display-lg text-display-lg text-primary glow-text font-bold">07</div>
+<div class="h-12 flex items-center justify-center font-display-lg text-[40px] text-on-surface-variant/60">08</div>
+<div class="h-12 flex items-center justify-center font-display-lg text-[32px] text-on-surface-variant/30">09</div>
+</div>
+</div>
+<!-- Separator -->
+<div class="font-display-lg text-display-lg text-primary pb-2 animate-pulse">:</div>
+<!-- Minutes Wheel -->
+<div class="h-full flex flex-col items-center justify-start overflow-hidden w-24 relative select-none">
+<div class="absolute inset-x-0 top-1/2 -mt-6 h-12 border-y border-primary/20 bg-primary/5 pointer-events-none rounded-sm"></div>
+<div class="flex flex-col items-center transform translate-y-[80px] transition-transform duration-300" id="mins-wheel">
+<div class="h-12 flex items-center justify-center font-display-lg text-[32px] text-on-surface-variant/30">15</div>
+<div class="h-12 flex items-center justify-center font-display-lg text-[40px] text-on-surface-variant/60">20</div>
+<div class="h-12 flex items-center justify-center font-display-lg text-display-lg text-primary glow-text font-bold">30</div>
+<div class="h-12 flex items-center justify-center font-display-lg text-[40px] text-on-surface-variant/60">40</div>
+<div class="h-12 flex items-center justify-center font-display-lg text-[32px] text-on-surface-variant/30">45</div>
+</div>
+</div>
+<!-- AM/PM Toggle (simplified for layout) -->
+<div class="flex flex-col justify-center space-y-4 ml-4">
+<button class="font-title-md text-title-md text-primary bg-primary/10 px-4 py-2 rounded-lg active:scale-95 transition-transform">AM</button>
+<button class="font-title-md text-title-md text-on-surface-variant px-4 py-2 rounded-lg active:scale-95 transition-transform">PM</button>
+</div>
+</div>
+</div>
+<!-- Recurrence Setting -->
+<div class="glass-panel rounded-xl p-md flex items-center justify-between">
+<div class="flex items-center space-x-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">event_repeat</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Repeat Daily</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Apply this time every day</p>
+</div>
+</div>
+<!-- Custom Toggle -->
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface border-4 border-surface-container-high appearance-none cursor-pointer transition-transform duration-200 ease-in-out z-10 checked:translate-x-6 checked:bg-primary" id="daily-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-container-high cursor-pointer transition-colors duration-200 ease-in-out" for="daily-toggle"></label>
+</div>
+</div>
+<!-- Spacer to push actions to bottom if needed, though they are fixed -->
+<div class="flex-1"></div>
+</main>
+<!-- Bottom Action Area (Fixed) -->
+<div class="fixed bottom-0 w-full bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 p-container-margin pb-safe flex space-x-md z-40">
+<button class="flex-1 py-4 rounded-lg border border-outline-variant text-on-surface font-title-md text-title-md hover:bg-surface-container-high active:scale-95 transition-all">
+            Cancel
+        </button>
+<button class="flex-1 py-4 rounded-lg bg-gradient-to-r from-primary to-[#2563EB] text-surface font-title-md text-title-md font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:opacity-90 active:scale-95 transition-all">
+            Save Time
+        </button>
+</div>
+<!-- Note: Suppressed bottom nav shell as this is a transactional "Task-Focused" screen with a Close action implied by the top left icon and bottom buttons. -->
+<script>
+        // Simple micro-interaction for the wheel visual effect (non-functional drag simulation)
+        const hoursWheel = document.getElementById('hours-wheel');
+        const minsWheel = document.getElementById('mins-wheel');
+        
+        let startY = 0;
+        
+        function handleTouchStart(e) {
+            startY = e.touches[0].clientY;
+        }
+        
+        function handleTouchMove(e, element) {
+            const currentY = e.touches[0].clientY;
+            const diff = (currentY - startY) * 0.5; // Dampened movement
+            // Limit movement for visual effect only
+            if (diff > -20 && diff < 20) {
+                element.style.transform = `translateY(calc(80px + ${diff}px))`;
+            }
+        }
+        
+        function handleTouchEnd(element) {
+            // Snap back
+            element.style.transform = 'translateY(80px)';
+        }
+
+        hoursWheel.addEventListener('touchstart', handleTouchStart);
+        hoursWheel.addEventListener('touchmove', (e) => handleTouchMove(e, hoursWheel));
+        hoursWheel.addEventListener('touchend', () => handleTouchEnd(hoursWheel));
+
+        minsWheel.addEventListener('touchstart', handleTouchStart);
+        minsWheel.addEventListener('touchmove', (e) => handleTouchMove(e, minsWheel));
+        minsWheel.addEventListener('touchend', () => handleTouchEnd(minsWheel));
+    </script>
+</body></html>
