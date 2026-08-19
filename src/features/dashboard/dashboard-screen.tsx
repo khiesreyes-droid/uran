@@ -11,7 +11,9 @@ import {
 } from '@/components/ui';
 import { Text } from '@/components/ui';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
-import { useRTDBForecast, type WeatherForecast, type DryingCondition } from './use-rtdb-forecast';
+import { DeviceSelector } from '@/features/devices/device-selector';
+import { useDeviceStore } from '@/features/devices/use-device-store';
+import { useRTDBForecast, getConditionText, getRainTimeDisplay, type WeatherForecast, type DryingCondition } from './use-rtdb-forecast';
 
 // ─── Screen-local icons ─────────────────────────────────────────────────────
 
@@ -155,7 +157,7 @@ function AiForecastCard({ forecast, loading, error, c }: AiForecastCardProps) {
                     <>
                       {'Rain likely around '}
                       <Text style={{ color: c.error, fontWeight: '700' }}>
-                        {forecast.rainTime ?? `${forecast.rainInHours}h`}
+                        {getRainTimeDisplay(forecast)}
                       </Text>
                     </>
                   )
@@ -174,7 +176,7 @@ function AiForecastCard({ forecast, loading, error, c }: AiForecastCardProps) {
                 { color: c.onSurfaceVariant, fontStyle: 'italic', marginTop: 2 },
               ]}
             >
-              {forecast.conditionText}
+              {getConditionText(forecast)}
             </Text>
           </>
         )}
@@ -232,7 +234,8 @@ export function DashboardScreen() {
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const [coverOpen, setCoverOpen] = useState(false);
-  const { data: forecast, loading: forecastLoading, error: forecastError } = useRTDBForecast();
+  const selectedDeviceId = useDeviceStore((s) => s.selectedDeviceId);
+  const { data: forecast, loading: forecastLoading, error: forecastError } = useRTDBForecast(selectedDeviceId);
   const isLoading = forecastLoading;
 
   useEffect(() => {
@@ -278,9 +281,7 @@ export function DashboardScreen() {
       >
         <View style={s.headerLeft}>
           <GridViewIcon color={c.primary} />
-          <Text style={[s.headerTitle, { color: c.onSurface }]}>
-            FRONT YARD
-          </Text>
+          <DeviceSelector />
         </View>
         <View style={s.headerBell}>
           <BellIcon color={c.primary} />

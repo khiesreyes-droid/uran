@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import {
   Dashboard as DashboardIcon,
+  History as HistoryIcon,
   Insights as InsightsIcon,
   Remote as RemoteIcon,
   Settings as SettingsIcon,
@@ -50,6 +51,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="history"
+        options={{
+          title: 'History',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <HistoryIcon color={color} />,
+          tabBarButtonTestID: 'history-tab',
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
@@ -59,6 +69,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen name="style" options={{ href: null }} />
+      <Tabs.Screen name="devices" options={{ href: null }} />
     </Tabs>
   );
 }

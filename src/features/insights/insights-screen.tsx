@@ -4,7 +4,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FocusAwareStatusBar, Pressable, ScrollView, Text } from '@/components/ui';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
-import { useRTDBForecast, type WeatherForecast } from '@/features/dashboard/use-rtdb-forecast';
+import { DeviceSelector } from '@/features/devices/device-selector';
+import { useDeviceStore } from '@/features/devices/use-device-store';
+import { useRTDBForecast, getConditionText, type WeatherForecast } from '@/features/dashboard/use-rtdb-forecast';
 import { weatherLabel } from './api';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -182,7 +184,7 @@ function AiInsightCard({ forecast, loading, c }: AiInsightCardProps) {
           <Text style={{ fontWeight: '700', color: c.primary }}>AI Insight: </Text>
           {loading
             ? 'Analyzing Tomorrow.io forecast data…'
-            : (forecast?.conditionText ?? 'No forecast available.')}
+            : (forecast ? getConditionText(forecast) : 'No forecast available.')}
         </Text>
         {forecast?.rainExpected && !loading && (
           <Pressable
@@ -283,7 +285,8 @@ function DrynessCard({ forecast, loading, c }: DrynessCardProps) {
 export function InsightsScreen() {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { data: forecast, loading, error: isError } = useRTDBForecast();
+  const selectedDeviceId = useDeviceStore((s) => s.selectedDeviceId);
+  const { data: forecast, loading, error: isError } = useRTDBForecast(selectedDeviceId);
 
   return (
     <View style={[s.container, { backgroundColor: c.background }]}>
@@ -292,7 +295,7 @@ export function InsightsScreen() {
       <View style={[s.header, { paddingTop: insets.top + 8, backgroundColor: c.background }]}>
         <View style={s.headerLeft}>
           <BrainIcon color={c.primary} />
-          <Text style={[s.headerTitle, { color: c.onSurface }]}>INSIGHTS</Text>
+          <DeviceSelector />
         </View>
         <View style={s.headerBell}>
           <BellIcon color={c.primary} />

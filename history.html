@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>FRONT YARD - Activity History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .status-glow-red { box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
+        .status-glow-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .status-glow-green { box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+        .status-glow-amber { box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .active-tab-indicator {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #adc6ff;
+            border-radius: 2px;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#a7b6cc",
+                    "on-tertiary": "#472a00",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-error-container": "#ffdad6",
+                    "background": "#10131a",
+                    "tertiary-container": "#ca8100",
+                    "outline-variant": "#424754",
+                    "surface-container-highest": "#32353c",
+                    "surface": "#10131a",
+                    "error-container": "#93000a",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#00285d",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed": "#2a1700",
+                    "on-background": "#e1e2ec",
+                    "on-surface-variant": "#c2c6d6",
+                    "tertiary": "#ffb95f",
+                    "inverse-on-surface": "#2e3038",
+                    "primary": "#adc6ff",
+                    "secondary": "#b9c8de",
+                    "inverse-surface": "#e1e2ec",
+                    "surface-tint": "#adc6ff",
+                    "surface-dim": "#10131a",
+                    "surface-container-high": "#272a31",
+                    "inverse-primary": "#005ac2",
+                    "secondary-fixed": "#d4e4fa",
+                    "primary-container": "#4d8eff",
+                    "primary-fixed": "#d8e2ff",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-surface": "#e1e2ec",
+                    "surface-container-lowest": "#0b0e15",
+                    "tertiary-fixed": "#ffddb8",
+                    "outline": "#8c909f",
+                    "on-secondary-fixed-variant": "#39485a",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container": "#1d2027",
+                    "secondary-fixed-dim": "#b9c8de",
+                    "on-primary-fixed": "#001a42",
+                    "on-secondary": "#233143",
+                    "on-secondary-fixed": "#0d1c2d",
+                    "secondary-container": "#39485a",
+                    "on-tertiary-container": "#3e2400",
+                    "on-primary": "#002e6a",
+                    "surface-container-low": "#191b23",
+                    "surface-variant": "#32353c",
+                    "surface-bright": "#363941"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "md": "16px",
+                    "gutter": "16px",
+                    "base": "4px",
+                    "sm": "12px",
+                    "xs": "8px",
+                    "container-margin": "20px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "title-md": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "display-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-lg min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-container-margin py-base bg-surface/80 dark:bg-surface/80 backdrop-blur-xl">
+<div class="flex items-center gap-md">
+<button class="p-xs rounded-full hover:bg-surface-container-highest/20 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary">grid_view</span>
+</button>
+<h1 class="text-title-md font-title-md font-bold tracking-tight text-on-surface dark:text-on-surface">FRONT YARD</h1>
+</div>
+<button class="p-xs rounded-full hover:bg-surface-container-highest/20 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</header>
+<main class="pt-20 pb-32 px-container-margin max-w-2xl mx-auto">
+<!-- Search & Filter Area -->
+<div class="space-y-lg mb-lg">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container-high border-none rounded-xl py-md pl-12 pr-md text-body-lg placeholder:text-outline focus:ring-2 focus:ring-primary/30 transition-all outline-none" placeholder="Search specific events..." type="text"/>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant/30 px-base">
+<div class="flex gap-lg overflow-x-auto no-scrollbar pb-base">
+<button class="relative py-xs text-label-caps font-label-caps text-primary">
+                        Today
+                        <div class="active-tab-indicator"></div>
+</button>
+<button class="relative py-xs text-label-caps font-label-caps text-on-surface-variant hover:text-on-surface transition-colors">
+                        Yesterday
+                    </button>
+<button class="relative py-xs text-label-caps font-label-caps text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">
+                        Last 7 Days
+                    </button>
+</div>
+<button class="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span class="text-label-caps font-label-caps">Filters</span>
+</button>
+</div>
+</div>
+<!-- Activity Timeline -->
+<div class="space-y-md">
+<!-- Event Item 1 -->
+<div class="glass-panel p-md rounded-xl flex gap-md items-start active:scale-[0.98] transition-transform cursor-pointer">
+<div class="p-sm bg-error/10 rounded-lg status-glow-red flex-shrink-0">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">rainy</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-title-md text-body-lg font-bold text-on-surface">Rain Detected</h3>
+<span class="text-label-caps font-label-caps text-on-surface-variant">2:15 PM</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">Precision sensors detected precipitation levels exceeding 0.5mm/hr in Zone A.</p>
+</div>
+</div>
+<!-- Event Item 2 -->
+<div class="glass-panel p-md rounded-xl flex gap-md items-start active:scale-[0.98] transition-transform cursor-pointer">
+<div class="p-sm bg-primary/10 rounded-lg status-glow-blue flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-title-md text-body-lg font-bold text-on-surface">Auto-Deployment Successful</h3>
+<span class="text-label-caps font-label-caps text-on-surface-variant">2:16 PM</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">Smart canopy deployed to protect high-risk garment area in 12 seconds.</p>
+</div>
+</div>
+<!-- Event Item 3 -->
+<div class="glass-panel p-md rounded-xl flex gap-md items-start active:scale-[0.98] transition-transform cursor-pointer">
+<div class="p-sm bg-green-500/10 rounded-lg status-glow-green flex-shrink-0">
+<span class="material-symbols-outlined text-green-400" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-title-md text-body-lg font-bold text-on-surface">Rain Stopped</h3>
+<span class="text-label-caps font-label-caps text-on-surface-variant">3:00 PM</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">Atmospheric sensors confirm zero precipitation. Cloud cover dissipating.</p>
+</div>
+</div>
+<!-- Event Item 4 -->
+<div class="glass-panel p-md rounded-xl flex gap-md items-start active:scale-[0.98] transition-transform cursor-pointer">
+<div class="p-sm bg-tertiary/10 rounded-lg status-glow-amber flex-shrink-0">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">back_hand</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-title-md text-body-lg font-bold text-on-surface">Manual Retraction</h3>
+<span class="text-label-caps font-label-caps text-on-surface-variant">3:15 PM</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">User overridden system state. Canopy retracted via remote interface.</p>
+</div>
+</div>
+<div class="py-md text-center">
+<span class="text-label-caps font-label-caps text-outline uppercase tracking-widest">Earlier Today</span>
+</div>
+<!-- Event Item 5 -->
+<div class="glass-panel p-md rounded-xl flex gap-md items-start active:scale-[0.98] transition-transform cursor-pointer">
+<div class="p-sm bg-secondary/10 rounded-lg flex-shrink-0">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-title-md text-body-lg font-bold text-on-surface">Weekly Maintenance Report Generated</h3>
+<span class="text-label-caps font-label-caps text-on-surface-variant">8:00 AM</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">System health check: 100%. All actuators and environmental sensors calibrated.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-container-margin z-[60] bg-primary text-on-primary-container px-lg py-md rounded-full flex items-center gap-xs shadow-[0_8px_32px_rgba(77,142,255,0.4)] hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined">ios_share</span>
+<span class="text-label-caps font-label-caps">Export History</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface/90 dark:bg-surface/90 backdrop-blur-lg rounded-t-xl shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-caps font-label-caps mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings_remote</span>
+<span class="text-label-caps font-label-caps mt-1">Remote</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-xs py-base shadow-[0_0_12px_rgba(77,142,255,0.3)] scale-95 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="text-label-caps font-label-caps mt-1">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="text-label-caps font-label-caps mt-1">Insights</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for tabs
+        const tabs = document.querySelectorAll('.relative.py-xs');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('text-primary');
+                    t.classList.add('text-on-surface-variant');
+                    const indicator = t.querySelector('.active-tab-indicator');
+                    if (indicator) indicator.remove();
+                });
+                tab.classList.add('text-primary');
+                tab.classList.remove('text-on-surface-variant');
+                const indicator = document.createElement('div');
+                indicator.className = 'active-tab-indicator';
+                tab.appendChild(indicator);
+            });
+        });
+
+        // Search highlight mock logic
+        const searchInput = document.querySelector('input');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.glass-panel');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body></html>
