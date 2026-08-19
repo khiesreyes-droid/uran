@@ -30,10 +30,10 @@
 #define WIFI_PASSWORD    "YOUR_WIFI_PASSWORD"
 
 // Firebase Console → Project Settings → General → Web API Key
-#define FIREBASE_API_KEY "AIzaSyCbwVIdWmTLTcxJ7Vo1mJ34nNdqypsbag4"
+#define FIREBASE_API_KEY ""
 
 // Firebase Console → Realtime Database → Data → URL shown at the top
-#define FIREBASE_DB_URL  "https://uran-48e06-default-rtdb.asia-southeast1.firebasedatabase.app"
+#define FIREBASE_DB_URL  ""
 
 // ─── Hardware pins ────────────────────────────────────────────────────────────
 //
