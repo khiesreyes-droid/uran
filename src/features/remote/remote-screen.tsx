@@ -10,6 +10,9 @@ import {
 import { Text } from '@/components/ui';
 import { useThemeColors } from '@/lib/theme';
 
+import { DeviceSelector } from '@/features/devices/device-selector';
+import { useDeviceStore } from '@/features/devices/use-device-store';
+import { sendCommand } from './api';
 import { AutomationSettings } from './components/automation-settings';
 import { AutoModeCard } from './components/auto-mode-card';
 import { Diagnostics } from './components/diagnostics';
@@ -37,6 +40,7 @@ function BellIcon({ color }: { color: string }) {
 export function RemoteScreen() {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
+  const selectedDeviceId = useDeviceStore((s) => s.selectedDeviceId);
 
   return (
     <View style={{ flex: 1, backgroundColor: c.background }}>
@@ -56,9 +60,7 @@ export function RemoteScreen() {
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <GridViewIcon color={c.primary} />
-          <Text style={{ fontSize: 18, fontWeight: '700', letterSpacing: -0.3, color: c.onSurface }}>
-            FRONT YARD
-          </Text>
+          <DeviceSelector />
         </View>
         <Pressable style={{ padding: 4 }}>
           <BellIcon color={c.primary} />
@@ -70,7 +72,10 @@ export function RemoteScreen() {
         showsVerticalScrollIndicator={false}
       >
         <StatusHeader />
-        <ManualControls onDeploy={() => {}} onRetract={() => {}} />
+        <ManualControls
+          onDeploy={() => { if (selectedDeviceId) sendCommand(selectedDeviceId, 'deploy'); }}
+          onRetract={() => { if (selectedDeviceId) sendCommand(selectedDeviceId, 'retract'); }}
+        />
         <AutoModeCard />
         <AutomationSettings />
         <SmartSchedule />

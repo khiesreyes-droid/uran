@@ -6,91 +6,117 @@ admin.initializeApp();
 
 const TOMORROW_API_KEY = defineSecret('TOMORROW_API_KEY');
 
-const LAT = 14.5995;     // ← your latitude
-const LON = 120.9842;    // ← your longitude
-const TZ  = 'Asia/Manila';
+const FIELDS = [
+  'temperature',
+  'humidity',
+  'windSpeed',
+  'precipitationProbability',
+  'weatherCode',
+].join(',');
+
+function dryingMinutes(temp: number, humidity: number, wind: number): number {
+  const mins = 60 + (humidity - 50) * 0.9 - (temp - 20) * 2.5 - Math.max(0, wind - 10) * 0.6;
+  return Math.round(Math.max(20, Math.min(180, mins)));
+}
+
+function condition(mins: number): string {
+  if (mins <= 40) return 'excellent';
+  if (mins <= 70) return 'optimal';
+  if (mins <= 110) return 'fair';
+  return 'poor';
+}
+
+
+type DeviceRecord = { id: string; latitude: number; longitude: number };
 
 export const refreshWeatherForecast = onSchedule(
   { schedule: 'every 30 minutes', secrets: [TOMORROW_API_KEY] },
   async () => {
-    const key = TOMORROW_API_KEY.value();
-    const url =
-      `https://api.tomorrow.io/v4/weather/forecast` +
-      `?location=${LAT},${LON}&timesteps=1h&units=metric` +
-      `&fields=temperature,humidity,windSpeed,precipitationProbability,weatherCode` +
-      `&apikey=${key}`;
+    const db = admin.database();
 
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Tomorrow.io ${res.status}`);
-    const data = await res.json();
+    // Collect all devices across all users
+    const usersSnap = await db.ref('users').once('value');
+    const usersVal = usersSnap.val() as Record<
+      string,
+      { devices?: Record<string, DeviceRecord> }
+    > | null;
 
-    const hourly: Array<{ time: string; values: Record<string, number> }> =
-      data.timelines?.hourly ?? [];
-    if (!hourly.length) throw new Error('No hourly data');
+    console.log('Users snapshot exists:', usersSnap.exists(), '| keys:', usersVal ? Object.keys(usersVal) : []);
+    if (!usersVal) return;
 
-    const cur = hourly[0].values;
-    const temp      = Math.round(cur.temperature ?? 0);
-    const humidity  = Math.round(cur.humidity    ?? 0);
-    const wind      = Math.round(cur.windSpeed   ?? 0);
-    const weatherCode = cur.weatherCode ?? 1000;
-
-    const precipProbability = hourly
-      .slice(0, 6)
-      .map(h => Math.round(h.values.precipitationProbability ?? 0));
-
-    const rainIndex = precipProbability.findIndex(p => p > 50);
-    const rainExpected = rainIndex !== -1;
-    let rainTime: string | null = null;
-    let rainInHours: number | null = null;
-
-    if (rainExpected) {
-      rainInHours = rainIndex + 1;
-      const rainDate = new Date(hourly[rainIndex].time);
-      rainTime = rainDate.toLocaleTimeString('en-US', {
-        hour: 'numeric', minute: '2-digit', hour12: true, timeZone: TZ,
-      });
+    const devices: DeviceRecord[] = [];
+    for (const [uid, userData] of Object.entries(usersVal)) {
+      console.log(`uid=${uid} has devices:`, userData.devices ? Object.keys(userData.devices) : 'none');
+      if (userData.devices) {
+        devices.push(...Object.values(userData.devices));
+      }
     }
 
-    let minutes = 60;
-    minutes += (humidity - 50) * 0.9;
-    minutes -= (temp - 20) * 2.5;
-    minutes -= Math.max(0, wind - 10) * 0.6;
-    minutes = Math.round(Math.max(20, Math.min(180, minutes)));
+    console.log('Total devices to process:', devices.length);
+    if (devices.length === 0) return;
 
-    let condition: string;
-    let conditionText: string;
-    if (rainExpected) {
-      condition = 'poor';
-      conditionText = `Rain likely around ${rainTime} — retract laundry before then.`;
-    } else if (minutes <= 40) {
-      condition = 'excellent';
-      conditionText = 'Excellent — hot, breezy, low humidity. Fast drying.';
-    } else if (minutes <= 65) {
-      condition = 'optimal';
-      conditionText = 'Optimal conditions detected for cotton garments.';
-    } else if (minutes <= 100) {
-      condition = 'fair';
-      conditionText = 'Fair conditions — moderate drying expected.';
-    } else {
-      condition = 'poor';
-      conditionText = 'High humidity — consider indoor drying today.';
-    }
+    await Promise.all(devices.map(async (device) => {
+      try {
+        const url =
+          `https://api.tomorrow.io/v4/weather/forecast` +
+          `?location=${device.latitude},${device.longitude}` +
+          `&timesteps=1h&units=metric&fields=${FIELDS}` +
+          `&apikey=${TOMORROW_API_KEY.value()}`;
 
-    await admin.database().ref('weather/forecast').set({
-      updatedAt: new Date().toISOString(),
-      temperature: temp,
-      humidity,
-      windSpeed: wind,
-      weatherCode,
-      rainExpected,
-      rainTime,
-      rainInHours,
-      estimatedMinutes: minutes,
-      condition,
-      conditionText,
-      precipProbability: precipProbability.slice(0, 4),
-    });
+        const res = await fetch(url);
+        if (!res.ok) {
+          console.error(`Tomorrow.io ${res.status} for device ${device.id}`);
+          return;
+        }
+        const json = await res.json();
 
-    console.log(`Done. rainExpected=${rainExpected} rainTime=${rainTime}`);
+        const hours: any[] = json.timelines?.hourly ?? [];
+        if (!hours.length) return;
+
+        const now = hours[0].values;
+        const temperature: number = now.temperature;
+        const humidity: number = now.humidity;
+        const windSpeed: number = now.windSpeed;
+        const weatherCode: number = now.weatherCode;
+
+        const precipProbability = hours.slice(0, 4).map((h) =>
+          Math.round(h.values.precipitationProbability ?? 0)
+        );
+
+        let rainExpected = false;
+        let rainAt: string | null = null;
+        let rainInHours: number | null = null;
+
+        for (let i = 0; i < Math.min(hours.length, 12); i++) {
+          if ((hours[i].values.precipitationProbability ?? 0) > 50) {
+            rainExpected = true;
+            rainInHours = i;
+            rainAt = hours[i].time;
+            break;
+          }
+        }
+
+        const estimatedMinutes = dryingMinutes(temperature, humidity, windSpeed);
+        const cond = condition(estimatedMinutes);
+
+        const forecast = {
+          updatedAt: new Date().toISOString(),
+          temperature,
+          humidity,
+          windSpeed,
+          weatherCode,
+          rainExpected,
+          rainAt,
+          rainInHours,
+          estimatedMinutes,
+          condition: cond,
+          precipProbability,
+        };
+
+        await db.ref(`weather/${device.id}/forecast`).set(forecast);
+      } catch (err) {
+        console.error(`Failed for device ${device.id}:`, err);
+      }
+    }));
   }
 );

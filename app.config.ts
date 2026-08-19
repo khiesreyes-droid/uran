@@ -57,8 +57,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#2E3C4B',
+      foregroundImage: './assets/icon.png',
+      backgroundColor: '#004cca',
     },
     package: Env.EXPO_PUBLIC_PACKAGE,
   },
@@ -125,6 +125,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-web-browser',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
+    [
+      'react-native-maps',
+      {
+        androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      },
+    ],
     ['@react-native-google-signin/google-signin'],
     (config: ExpoConfig) =>
       withDangerousMod(config as Parameters<ConfigPlugin>[0], [
