@@ -5,7 +5,6 @@ import {
   Dashboard as DashboardIcon,
   History as HistoryIcon,
   Insights as InsightsIcon,
-  Remote as RemoteIcon,
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
 import { useAuthStore as useAuth } from '@/features/auth/use-auth-store';
@@ -32,15 +31,8 @@ export default function TabLayout() {
           tabBarButtonTestID: 'dashboard-tab',
         }}
       />
-      <Tabs.Screen
-        name="remote"
-        options={{
-          title: 'Remote',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <RemoteIcon color={color} />,
-          tabBarButtonTestID: 'remote-tab',
-        }}
-      />
+      {/* Remote tab hidden for now — route still reachable directly */}
+      <Tabs.Screen name="remote" options={{ href: null }} />
       <Tabs.Screen
         name="insights"
         options={{

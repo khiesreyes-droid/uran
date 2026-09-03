@@ -78,9 +78,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
+        // Android 12+ only renders a centered icon over a solid color for the
+        // OS splash — a full-bleed image is not possible there. Keep this a
+        // small logo on the dark ground; the full-screen splash art is drawn
+        // by <CustomSplashScreen> once JS boots.
         backgroundColor: '#10131a',
-        image: './assets/splash-bg.png',
-        resizeMode: 'cover',
+        image: './assets/splash-icon.png',
+        imageWidth: 180,
+        resizeMode: 'contain',
       },
     ],
     [

@@ -270,9 +270,11 @@ void uploadReading() {
 
   // ── Update online status ──────────────────────────────────────────────────
   db.set<bool>(aClient, basePath + "/status/online", true);
-  if (ts.length()) {
-    db.set<String>(aClient, basePath + "/status/lastSeen", ts);
-  }
+
+  object_t serverTs;
+  JsonWriter tsWriter;
+  tsWriter.create(serverTs, ".sv", string_t("timestamp"));
+  db.set<object_t>(aClient, basePath + "/status/lastSeen", serverTs);
 
   blink(2);
 }

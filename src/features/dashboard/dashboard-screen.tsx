@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ActivityIndicator, Animated, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   FocusAwareStatusBar,
-  Pressable,
   ScrollView,
   View,
 } from '@/components/ui';
@@ -14,6 +13,19 @@ import { useThemeColors, type ThemeColors } from '@/lib/theme';
 import { DeviceSelector } from '@/features/devices/device-selector';
 import { useDeviceStore } from '@/features/devices/use-device-store';
 import { useRTDBForecast, getConditionText, getRainTimeDisplay, type WeatherForecast, type DryingCondition } from './use-rtdb-forecast';
+import { useDeviceConnection, useDeviceStatus, formatLastSeen } from './use-device-status';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatDeviceStatus(status: string | undefined): string {
+  if (!status) return '—';
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+}
+
+/** Formats a numeric sensor reading, or an em-dash when it is missing. */
+function fmtReading(n: number | undefined, digits = 1): string {
+  return typeof n === 'number' && Number.isFinite(n) ? n.toFixed(digits) : '—';
+}
 
 // ─── Screen-local icons ─────────────────────────────────────────────────────
 
@@ -65,14 +77,6 @@ function LayersIcon({ color, size = 22 }: { color: string; size?: number }) {
   );
 }
 
-function BatteryIcon({ color, size = 22 }: { color: string; size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM13 18h-2v-2H9l3-5v3h2l-3 5v-3z" />
-    </Svg>
-  );
-}
-
 function WifiIcon({ color, size = 22 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
@@ -81,10 +85,10 @@ function WifiIcon({ color, size = 22 }: { color: string; size?: number }) {
   );
 }
 
-function EmergencyIcon({ color, size = 24 }: { color: string; size?: number }) {
+function WindIcon({ color, size = 22 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+      <Path d="M13 5.83a2.5 2.5 0 1 1 1.98 4.02H3v2h11.98A4.5 4.5 0 1 0 11 5.83h2zm4 8.17H3v2h14a2.5 2.5 0 1 1-1.98 4.02h-2A4.5 4.5 0 1 0 17 14z" />
     </Svg>
   );
 }
@@ -233,9 +237,10 @@ export function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const [coverOpen, setCoverOpen] = useState(false);
   const selectedDeviceId = useDeviceStore((s) => s.selectedDeviceId);
   const { data: forecast, loading: forecastLoading, error: forecastError } = useRTDBForecast(selectedDeviceId);
+  const { data: deviceStatus, loading: statusLoading } = useDeviceStatus(selectedDeviceId);
+  const { online, lastSeen, loading: connectionLoading } = useDeviceConnection(selectedDeviceId);
   const isLoading = forecastLoading;
 
   useEffect(() => {
@@ -283,7 +288,7 @@ export function DashboardScreen() {
           <GridViewIcon color={c.primary} />
           <DeviceSelector />
         </View>
-        <View style={s.headerBell}>
+        {/* <View style={s.headerBell}>
           <BellIcon color={c.primary} />
           <View
             style={[
@@ -291,7 +296,7 @@ export function DashboardScreen() {
               { backgroundColor: c.error, borderColor: c.background },
             ]}
           />
-        </View>
+        </View> */}
       </View>
 
       <ScrollView
@@ -348,7 +353,7 @@ export function DashboardScreen() {
             </View>
           </View>
 
-          <View style={[s.modeBadge, { backgroundColor: c.secondaryContainer }]}>
+          {/* <View style={[s.modeBadge, { backgroundColor: c.secondaryContainer }]}>
             <Animated.View
               style={[
                 s.pulseDot,
@@ -358,7 +363,7 @@ export function DashboardScreen() {
             <Text style={[s.labelCaps, { color: c.onSurface }]}>
               MANUAL MODE
             </Text>
-          </View>
+          </View> */}
         </View>
 
         {/* AI Forecast card — powered by Google WeatherNext2 */}
@@ -379,9 +384,9 @@ export function DashboardScreen() {
             c={c}
           />
           <SensorCard
-            label="COVER"
+            label="Status"
             icon={<LayersIcon color={c.primary} />}
-            value="Retracted"
+            value={statusLoading ? '—' : formatDeviceStatus(deviceStatus?.device_status)}
             sub={
               <View
                 style={[
@@ -397,22 +402,22 @@ export function DashboardScreen() {
         </View>
         <View style={[s.bentoRow, { marginBottom: 16 }]}>
           <SensorCard
-            label="POWER"
-            icon={<BatteryIcon color={c.primary} />}
-            value="92%"
-            sub="Charging via solar"
+            label="CONNECTION STATUS"
+            icon={<WifiIcon color={c.primary} />}
+            value={connectionLoading ? '—' : online ? 'Online' : 'Offline'}
+            sub={connectionLoading ? undefined : `Last seen: ${formatLastSeen(lastSeen)}`}
             c={c}
           />
           <SensorCard
-            label="LINK"
-            icon={<WifiIcon color={c.primary} />}
-            value="Strong"
-            sub="-42 dBm"
+            label="WIND"
+            icon={<WindIcon color={c.primary} />}
+            value={isLoading ? '—' : `${fmtReading(forecast?.windSpeed)} km/h`}
+            sub={isLoading ? undefined : 'From forecast'}
             c={c}
           />
         </View>
 
-        {/* Ambient sensors row — values from WeatherNext2 */}
+        {/* Ambient sensors row — live readings from devices/{id}/latest */}
         <View
           style={[
             s.sensorsRow,
@@ -428,7 +433,7 @@ export function DashboardScreen() {
           >
             <Text style={[s.labelCaps, { color: c.onSurfaceVariant }]}>TEMP</Text>
             <Text style={[s.bodyLgBold, { color: c.onSurface }]}>
-              {isLoading ? '—' : `${forecast?.temperature ?? '—'}°C`}
+              {statusLoading ? '—' : `${fmtReading(deviceStatus?.temperature)}°C`}
             </Text>
           </View>
           <View
@@ -436,97 +441,14 @@ export function DashboardScreen() {
           >
             <Text style={[s.labelCaps, { color: c.onSurfaceVariant }]}>HUMID</Text>
             <Text style={[s.bodyLgBold, { color: c.onSurface }]}>
-              {isLoading ? '—' : `${forecast?.humidity ?? '—'}%`}
+              {statusLoading ? '—' : `${fmtReading(deviceStatus?.humidity)}%`}
             </Text>
           </View>
           <View style={s.sensorCellLast}>
-            <Text style={[s.labelCaps, { color: c.onSurfaceVariant }]}>WIND</Text>
+            <Text style={[s.labelCaps, { color: c.onSurfaceVariant }]}>RAIN</Text>
             <Text style={[s.bodyLgBold, { color: c.onSurface }]}>
-              {isLoading ? '—' : `${forecast?.windSpeed ?? '—'} km/h`}
+              {statusLoading ? '—' : `${fmtReading(deviceStatus?.rain_avg, 0)}`}
             </Text>
-          </View>
-        </View>
-
-        {/* Quick actions */}
-        <Text style={[s.sectionLabel, { color: c.onSurfaceVariant }]}>
-          QUICK ACTIONS
-        </Text>
-        <View style={[s.actionsRow, { marginTop: 12, marginBottom: 24 }]}>
-          <Pressable
-            onPress={() => setCoverOpen((v) => !v)}
-            style={[
-              s.toggleBtn,
-              {
-                backgroundColor: `${c.surfaceContainer}B3`,
-                borderColor: `${c.outlineVariant}1A`,
-              },
-            ]}
-          >
-            <View style={s.toggleLeft}>
-              <View
-                style={[s.toggleIconWrap, { backgroundColor: `${c.primary}1A` }]}
-              >
-                <LayersIcon color={c.primary} size={24} />
-              </View>
-              <View>
-                <Text style={[s.bodyLgBold, { color: c.onSurface }]}>
-                  {coverOpen ? 'Open' : 'Closed'}
-                </Text>
-                <Text style={[s.bodySm, { color: c.onSurfaceVariant }]}>
-                  {`Status: ${coverOpen ? 'Open' : 'Retracted'}`}
-                </Text>
-              </View>
-            </View>
-            <View
-              style={[
-                s.switchTrack,
-                {
-                  backgroundColor: coverOpen
-                    ? c.primaryContainer
-                    : c.surfaceContainerHighest,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  s.switchThumb,
-                  {
-                    backgroundColor: coverOpen
-                      ? c.onPrimaryContainer
-                      : c.onSurfaceVariant,
-                    transform: [{ translateX: coverOpen ? 24 : 0 }],
-                  },
-                ]}
-              />
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={[
-              s.stopBtn,
-              {
-                backgroundColor: `${c.surfaceContainer}B3`,
-                borderColor: `${c.error}33`,
-              },
-            ]}
-          >
-            <EmergencyIcon color={c.error} size={24} />
-            <Text style={[s.stopLabel, { color: c.error }]}>STOP</Text>
-          </Pressable>
-        </View>
-
-        {/* Atmospheric visual layer */}
-        <View
-          style={[
-            s.atmosphericLayer,
-            {
-              backgroundColor: c.surfaceContainerLowest,
-              borderColor: `${c.primary}1A`,
-            },
-          ]}
-        >
-          <View style={[s.liveViewBadge, { backgroundColor: `${c.primary}33` }]}>
-            <Text style={[s.labelCaps, { color: c.primary }]}>LIVE VIEW</Text>
           </View>
         </View>
       </ScrollView>
@@ -622,61 +544,6 @@ const s = StyleSheet.create({
     borderRightWidth: 1,
   },
   sensorCellLast: { flex: 1, alignItems: 'center', paddingVertical: 16 },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-  actionsRow: { flexDirection: 'row', gap: 12 },
-  toggleBtn: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 18,
-  },
-  toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  toggleIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  switchTrack: {
-    width: 56,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  switchThumb: { width: 24, height: 24, borderRadius: 12 },
-  stopBtn: {
-    width: 80,
-    borderWidth: 1,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    padding: 16,
-  },
-  stopLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
-  atmosphericLayer: {
-    height: 160,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'flex-end',
-    padding: 16,
-  },
-  liveViewBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
   progressBg: {
     width: '100%',
     height: 4,

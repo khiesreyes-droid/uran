@@ -79,29 +79,29 @@ type FilterPeriod = 'today' | 'yesterday' | '7days';
 function filterByPeriod(events: HistoryEvent[], period: FilterPeriod): HistoryEvent[] {
   const now = Date.now();
   return events.filter((e) => {
-    const t = new Date(e.issuedAt).getTime();
-    if (period === 'today') return localDateStr(e.issuedAt) === todayStr();
-    if (period === 'yesterday') return localDateStr(e.issuedAt) === yesterdayStr();
+    const t = new Date(e.timestamp).getTime();
+    if (period === 'today') return localDateStr(e.timestamp) === todayStr();
+    if (period === 'yesterday') return localDateStr(e.timestamp) === yesterdayStr();
     return t >= now - 7 * 86400000;
   });
 }
 
 // ─── Event card ───────────────────────────────────────────────────────────────
 
-function EventCard({ event, c }: { event: HistoryEvent; c: ReturnType<typeof useThemeColors> }) {
-  const isDeploy = event.action === 'deploy';
-  const isManual = event.source === 'manual';
+// "opening" / "open" read as the cover deploying; everything else as retracting.
+function isDeployStatus(status: string): boolean {
+  return /open/i.test(status);
+}
 
+function formatStatus(status: string): string {
+  if (!status || status === '—') return 'Unknown';
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+}
+
+function EventCard({ event, c }: { event: HistoryEvent; c: ReturnType<typeof useThemeColors> }) {
+  const isDeploy = isDeployStatus(event.deviceStatus);
   const iconColor = isDeploy ? c.primary : c.tertiary;
   const iconBg = isDeploy ? `${c.primary}1A` : `${c.tertiary}1A`;
-
-  const title = isDeploy
-    ? (isManual ? 'Manual Deploy' : 'Auto Deploy')
-    : (isManual ? 'Manual Retract' : 'Auto Retract');
-
-  const description = isDeploy
-    ? (isManual ? 'Cover deployed via remote control.' : 'Cover deployed automatically by the system.')
-    : (isManual ? 'Cover retracted via remote control.' : 'Cover retracted automatically by the system.');
 
   return (
     <View
@@ -117,10 +117,9 @@ function EventCard({ event, c }: { event: HistoryEvent; c: ReturnType<typeof use
       </View>
       <View style={s.cardBody}>
         <View style={s.cardTop}>
-          <Text style={[s.cardTitle, { color: c.onSurface }]}>{title}</Text>
-          <Text style={[s.cardTime, { color: c.onSurfaceVariant }]}>{formatTime(event.issuedAt)}</Text>
+          <Text style={[s.cardTitle, { color: c.onSurface }]}>{formatStatus(event.deviceStatus)}</Text>
+          <Text style={[s.cardTime, { color: c.onSurfaceVariant }]}>{formatTime(event.timestamp)}</Text>
         </View>
-        <Text style={[s.cardDesc, { color: c.onSurfaceVariant }]}>{description}</Text>
       </View>
     </View>
   );
@@ -135,19 +134,13 @@ export function HistoryScreen() {
   const { events, loading } = useHistory(selectedDeviceId);
 
   const [search, setSearch] = useState('');
-  const [period, setPeriod] = useState<FilterPeriod>('today');
+  const [period, setPeriod] = useState<FilterPeriod>('7days');
 
   const filtered = useMemo(() => {
     let result = filterByPeriod(events, period);
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter(
-        (e) => e.action.includes(q) || e.source.includes(q)
-          || (q.includes('deploy') && e.action === 'deploy')
-          || (q.includes('retract') && e.action === 'retract')
-          || (q.includes('manual') && e.source === 'manual')
-          || (q.includes('auto') && e.source === 'auto'),
-      );
+      result = result.filter((e) => e.deviceStatus.toLowerCase().includes(q));
     }
     return result;
   }, [events, period, search]);
@@ -156,7 +149,7 @@ export function HistoryScreen() {
   const grouped = useMemo(() => {
     const groups: { label: string; items: HistoryEvent[] }[] = [];
     for (const event of filtered) {
-      const label = dateLabel(localDateStr(event.issuedAt));
+      const label = dateLabel(localDateStr(event.timestamp));
       const last = groups[groups.length - 1];
       if (last && last.label === label) {
         last.items.push(event);
@@ -247,7 +240,11 @@ export function HistoryScreen() {
                 <HistoryIcon color={`${c.onSurfaceVariant}40`} width={48} height={48} />
                 <Text style={[s.emptyTitle, { color: c.onSurface }]}>No events</Text>
                 <Text style={[s.emptyDesc, { color: c.onSurfaceVariant }]}>
-                  {search ? 'No results match your search.' : 'Deploy or retract the cover to see events here.'}
+                  {search
+                    ? 'No results match your search.'
+                    : events.length > 0
+                      ? 'No state changes in this period — try “Last 7 Days”.'
+                      : 'Cover state changes will appear here once the device reports in.'}
                 </Text>
               </View>
             )

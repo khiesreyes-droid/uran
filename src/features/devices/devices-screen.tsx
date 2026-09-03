@@ -18,8 +18,9 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { Modal, useModal } from '@/components/ui/modal';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
 
-import { addDevice, deleteDevice, useDevices } from './api';
+import { addDevice, deleteDevice, updateDevice, useDevices } from './api';
 import { MapLocationPicker } from './map-location-picker';
+import type { Device } from './types';
 import { useDeviceStore } from './use-device-store';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -36,6 +37,14 @@ function PlusIcon({ color }: { color: string }) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill={color}>
       <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+    </Svg>
+  );
+}
+
+function EditIcon({ color }: { color: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill={color}>
+      <Path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
     </Svg>
   );
 }
@@ -58,18 +67,8 @@ function LocationIcon({ color }: { color: string }) {
 
 // ─── Form schema ──────────────────────────────────────────────────────────────
 
-const normalizeMac = (v: string) => v.replace(/[:\-\s]/g, '').toUpperCase();
-
-const formatMac = (text: string): string => {
-  const hex = text.replace(/[^0-9A-Fa-f]/g, '').toUpperCase().slice(0, 12);
-  return hex.match(/.{1,2}/g)?.join(':') ?? '';
-};
-
 const deviceSchema = z.object({
-  macAddress: z
-    .string()
-    .min(1, 'MAC address is required')
-    .refine((v) => /^[0-9A-Fa-f]{12}$/.test(normalizeMac(v)), 'Enter a valid MAC (e.g. A4:CF:12:34:56:78)'),
+  deviceId: z.string().min(1, 'Device ID is required'),
   name: z.string().min(1, 'Device name is required'),
   address: z.string(),
   latitude: z
@@ -136,35 +135,54 @@ const fi = StyleSheet.create({
   error: { fontSize: 12, marginTop: 4 },
 });
 
-// ─── Add device sheet ─────────────────────────────────────────────────────────
+// ─── Add / edit device sheet ──────────────────────────────────────────────────
 
-function AddDeviceSheet({ sheetRef, dismiss }: {
+function DeviceFormSheet({ sheetRef, dismiss, device, onDismiss }: {
   sheetRef: React.RefObject<any>;
   dismiss: () => void;
+  device?: Device | null;
+  onDismiss?: () => void;
 }) {
   const c = useThemeColors();
+  const isEdit = !!device;
   const setSelectedDeviceId = useDeviceStore((s) => s.setSelectedDeviceId);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [mapVisible, setMapVisible] = useState(false);
 
   const form = useForm({
-    defaultValues: { macAddress: '', name: '', address: '', latitude: '', longitude: '' },
+    defaultValues: {
+      deviceId: device?.id ?? '',
+      name: device?.name ?? '',
+      address: device?.address ?? '',
+      latitude: device ? String(device.latitude) : '',
+      longitude: device ? String(device.longitude) : '',
+    },
     validators: { onChange: deviceSchema as any },
     onSubmit: async ({ value }) => {
       try {
         setSubmitError(null);
-        const id = await addDevice({
-          id: normalizeMac(value.macAddress),
-          name: value.name.trim(),
-          address: value.address.trim(),
-          latitude: Number(value.latitude),
-          longitude: Number(value.longitude),
-        });
-        setSelectedDeviceId(id);
-        form.reset();
-        dismiss();
+        if (isEdit && device) {
+          await updateDevice(device.id, {
+            name: value.name.trim(),
+            address: value.address.trim(),
+            latitude: Number(value.latitude),
+            longitude: Number(value.longitude),
+          });
+          dismiss();
+        } else {
+          const id = await addDevice({
+            id: value.deviceId.trim(),
+            name: value.name.trim(),
+            address: value.address.trim(),
+            latitude: Number(value.latitude),
+            longitude: Number(value.longitude),
+          });
+          setSelectedDeviceId(id);
+          form.reset();
+          dismiss();
+        }
       } catch (err: any) {
-        console.error('[addDevice]', err);
+        console.error('[deviceForm]', err);
         setSubmitError(err?.message ?? 'Failed to save device. Check your connection.');
       }
     },
@@ -184,28 +202,42 @@ function AddDeviceSheet({ sheetRef, dismiss }: {
       }}
       onCancel={() => setMapVisible(false)}
     />
-    <Modal ref={sheetRef} title="Add Device" snapPoints={['82%']}>
+    <Modal ref={sheetRef} title={isEdit ? 'Edit Device' : 'Add Device'} snapPoints={['82%']} onDismiss={onDismiss}>
       <BottomSheetScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
         keyboardShouldPersistTaps="handled"
       >
-        <form.Field
-          name="macAddress"
-          children={(field) => (
-            <FormInput
-              label="ESP32 MAC ADDRESS"
-              c={c}
-              placeholder="A4:CF:12:34:56:78"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChangeText={(text) => field.handleChange(formatMac(text))}
-              error={getFieldError(field)}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              maxLength={17}
-            />
-          )}
-        />
+        {isEdit
+          ? (
+              <View style={fi.wrap}>
+                <Text style={[fi.label, { color: c.onSurfaceVariant }]}>DEVICE ID</Text>
+                <View
+                  style={[
+                    fi.input,
+                    { borderColor: c.outlineVariant, backgroundColor: c.surfaceContainerLow, justifyContent: 'center' },
+                  ]}
+                >
+                  <Text style={{ color: `${c.onSurfaceVariant}CC`, fontSize: 15 }}>{device?.id}</Text>
+                </View>
+              </View>
+            )
+          : (
+              <form.Field
+                name="deviceId"
+                children={(field) => (
+                  <FormInput
+                    label="DEVICE ID"
+                    c={c}
+                    placeholder="e.g. living-room-sensor"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChangeText={field.handleChange}
+                    error={getFieldError(field)}
+                    autoCorrect={false}
+                  />
+                )}
+              />
+            )}
 
         <form.Field
           name="name"
@@ -323,7 +355,7 @@ function AddDeviceSheet({ sheetRef, dismiss }: {
                 ? <ActivityIndicator size="small" color={c.onPrimaryContainer} />
                 : (
                     <Text style={[s.saveBtnLabel, { color: c.onPrimaryContainer }]}>
-                      SAVE DEVICE
+                      {isEdit ? 'UPDATE DEVICE' : 'SAVE DEVICE'}
                     </Text>
                   )}
             </Pressable>
@@ -342,9 +374,15 @@ export function DevicesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { ref: addSheetRef, present: openAddSheet, dismiss: closeAddSheet } = useModal();
+  const { ref: editSheetRef, present: openEditSheet, dismiss: closeEditSheet } = useModal();
   const { devices, loading } = useDevices();
   const selectedDeviceId = useDeviceStore((s) => s.selectedDeviceId);
   const setSelectedDeviceId = useDeviceStore((s) => s.setSelectedDeviceId);
+  const [editingDevice, setEditingDevice] = useState<Device | null>(null);
+
+  React.useEffect(() => {
+    if (editingDevice) openEditSheet();
+  }, [editingDevice, openEditSheet]);
 
   const handleDelete = async (deviceId: string) => {
     await deleteDevice(deviceId);
@@ -460,23 +498,41 @@ export function DevicesScreen() {
                             {`${device.latitude.toFixed(5)}, ${device.longitude.toFixed(5)}`}
                           </Text>
                           <Text style={[s.deviceCoords, { color: `${c.onSurfaceVariant}60` }]}>
-                            {device.id.match(/.{2}/g)?.join(':') ?? device.id}
+                            {device.id}
                           </Text>
                         </View>
-                        <Pressable
-                          onPress={() => handleDelete(device.id)}
-                          style={s.deleteBtn}
-                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        >
-                          <TrashIcon color={c.error} />
-                        </Pressable>
+                        <View style={s.cardActions}>
+                          <Pressable
+                            onPress={() => setEditingDevice(device)}
+                            style={s.deleteBtn}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                          >
+                            <EditIcon color={c.primary} />
+                          </Pressable>
+                          <Pressable
+                            onPress={() => handleDelete(device.id)}
+                            style={s.deleteBtn}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                          >
+                            <TrashIcon color={c.error} />
+                          </Pressable>
+                        </View>
                       </Pressable>
                     );
                   })}
             </ScrollView>
           )}
 
-      <AddDeviceSheet sheetRef={addSheetRef} dismiss={closeAddSheet} />
+      <DeviceFormSheet sheetRef={addSheetRef} dismiss={closeAddSheet} />
+      {editingDevice && (
+        <DeviceFormSheet
+          key={editingDevice.id}
+          sheetRef={editSheetRef}
+          dismiss={closeEditSheet}
+          device={editingDevice}
+          onDismiss={() => setEditingDevice(null)}
+        />
+      )}
     </View>
   );
 }
@@ -532,6 +588,7 @@ const s = StyleSheet.create({
   deviceCoords: { fontSize: 11 },
   activeBadge: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
   activeBadgeLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 1 },
+  cardActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   deleteBtn: { padding: 6 },
   mapPinBtn: {
     flexDirection: 'row',

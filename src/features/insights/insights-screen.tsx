@@ -84,6 +84,18 @@ function WeatherIcon({ code, color, size = 36 }: { code: number; color: string; 
 const CHART_H = 80;
 const CHART_LABELS = ['NOW', '+1H', '+2H', '+3H'];
 
+// Firebase RTDB can hand the array back as an object ({ '0': .. }) and drops
+// entries it considers empty, so normalise to a fixed 4-slot number array.
+function normalizeProb(
+  raw: WeatherForecast['precipProbability'] | Record<string, number> | null | undefined,
+): number[] {
+  const arr = raw == null ? [] : Array.isArray(raw) ? raw : Object.values(raw);
+  return [0, 1, 2, 3].map((i) => {
+    const n = Number(arr[i]);
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 0;
+  });
+}
+
 interface CurrentWeatherCardProps {
   forecast: WeatherForecast | null | undefined;
   loading: boolean;
@@ -92,7 +104,7 @@ interface CurrentWeatherCardProps {
 
 function CurrentWeatherCard({ forecast, loading, c }: CurrentWeatherCardProps) {
   const code = forecast?.weatherCode ?? 1000;
-  const prob = forecast?.precipProbability ?? [0, 0, 0, 0];
+  const prob = normalizeProb(forecast?.precipProbability);
   const maxProb = Math.max(...prob, 10);
 
   return (
@@ -148,18 +160,21 @@ function CurrentWeatherCard({ forecast, loading, c }: CurrentWeatherCardProps) {
                 />
               </View>
               <Text style={[s.chartLabel, { color: c.onSurfaceVariant }]}>{label}</Text>
-              {p > 0 && (
-                <Text style={[s.chartPct, { color: isHigh ? c.error : c.primary }]}>
-                  {`${p}%`}
-                </Text>
-              )}
+              <Text
+                style={[
+                  s.chartPct,
+                  { color: isHigh ? c.error : p > 0 ? c.primary : c.onSurfaceVariant },
+                ]}
+              >
+                {loading ? '' : forecast ? `${p}%` : '—'}
+              </Text>
             </View>
           );
         })}
       </View>
 
       <Text style={[s.sourceLabel, { color: `${c.onSurfaceVariant}80` }]}>
-        Via Tomorrow.io · Firebase RTDB
+        Via Tomorrow.io 
       </Text>
     </View>
   );
