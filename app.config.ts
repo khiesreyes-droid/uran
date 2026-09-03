@@ -10,6 +10,13 @@ import 'tsx/cjs';
 // eslint-disable-next-line perfectionist/sort-imports
 import Env from './env';
 
+// Converts "1.2.3" → 10203 (major*10000 + minor*100 + patch)
+// Guarantees versionCode increases with every semver bump.
+function semverToVersionCode(version: string): number {
+  const [major = 0, minor = 0, patch = 0] = version.split('.').map(Number);
+  return major * 10000 + minor * 100 + patch;
+}
+
 const EXPO_ACCOUNT_OWNER = 'obytes';
 const EAS_PROJECT_ID = 'c3e1075b-6fe7-4686-aa49-35b46a229044';
 
@@ -61,6 +68,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#004cca',
     },
     package: Env.EXPO_PUBLIC_PACKAGE,
+    versionCode: semverToVersionCode(Env.EXPO_PUBLIC_VERSION),
   },
   web: {
     favicon: './assets/favicon.png',

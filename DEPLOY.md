@@ -62,5 +62,7 @@ Google Play re-signs the AAB with its own key. After the first upload:
 
 ## 6. Bump Version Before Next Release
 
-- `.env` → increment `EXPO_PUBLIC_VERSION`
-- `app.config.ts` → increment `versionCode` (must increase with every Play Store upload)
+- `package.json` → increment `version` (e.g. `1.0.1`) — that's the only file to change
+  - `versionName` is read automatically from `package.json`
+  - `versionCode` is computed automatically: `1.0.1` → `10001`, `1.1.0` → `10100`, `2.0.0` → `20000`
+- Then run `.\scripts\android-clean-rebuild.ps1 -AppEnv production` again before building
