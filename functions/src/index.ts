@@ -1,11 +1,15 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { onValueCreated, onValueWritten } from 'firebase-functions/v2/database';
+import { onValueCreated, onValueUpdated, onValueWritten } from 'firebase-functions/v2/database';
 import { defineSecret } from 'firebase-functions/params';
 import * as admin from 'firebase-admin';
 
 admin.initializeApp();
 
 const TOMORROW_API_KEY = defineSecret('TOMORROW_API_KEY');
+
+// RTDB (uran-48e06-default-rtdb) lives in asia-southeast1. v2 database triggers
+// must be deployed in the same region as the instance they watch.
+const RTDB_REGION = 'asia-southeast1';
 
 const FIELDS = [
   'temperature',
@@ -151,12 +155,35 @@ export const refreshWeatherForecast = onSchedule(
 // ─── On device registration — fetch that device's forecast immediately ───────
 
 export const forecastOnDeviceCreate = onValueCreated(
-  { ref: '/users/{uid}/devices/{deviceId}', secrets: [TOMORROW_API_KEY] },
+  { ref: '/users/{uid}/devices/{deviceId}', region: RTDB_REGION, secrets: [TOMORROW_API_KEY] },
   async (event) => {
     const device = event.data.val() as DeviceRecord | null;
     if (!device) return;
     console.log(`New device ${event.params.deviceId} for uid ${event.params.uid} — fetching forecast`);
     await fetchForecastForDevice(device, TOMORROW_API_KEY.value());
+  }
+);
+
+// ─── On device edit — refetch when the coordinates move ─────────────────────
+// onValueCreated above only covers registration. When the user edits a device's
+// location (updateDevice → users/{uid}/devices/{deviceId}), re-fetch so the
+// forecast isn't stale for up to 30 minutes until refreshWeatherForecast runs.
+
+export const forecastOnDeviceUpdate = onValueUpdated(
+  { ref: '/users/{uid}/devices/{deviceId}', region: RTDB_REGION, secrets: [TOMORROW_API_KEY] },
+  async (event) => {
+    const before = event.data.before.val() as DeviceRecord | null;
+    const after = event.data.after.val() as DeviceRecord | null;
+    if (!after) return;
+
+    const moved =
+      before?.latitude !== after.latitude || before?.longitude !== after.longitude;
+    if (!moved) return;
+
+    console.log(
+      `Device ${event.params.deviceId} moved to ${after.latitude},${after.longitude} — refetching forecast`
+    );
+    await fetchForecastForDevice(after, TOMORROW_API_KEY.value());
   }
 );
 
@@ -179,7 +206,7 @@ const PRUNE_ERROR_CODES = new Set([
 ]);
 
 export const notifyOnDeviceStatus = onValueWritten(
-  '/devices/{deviceId}/latest/device_status',
+  { ref: '/devices/{deviceId}/latest/device_status', region: RTDB_REGION },
   async (event) => {
     const before = event.data.before.val() as string | null;
     const after = event.data.after.val() as string | null;
