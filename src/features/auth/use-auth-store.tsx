@@ -1,9 +1,10 @@
 import type { TokenType } from '@/lib/auth/utils';
 
-import { create } from 'zustand';
-
-import { firebaseAuth, onAuthStateChanged } from '@/lib/firebase/auth';
 import { signOut as firebaseSignOut } from 'firebase/auth';
+
+import { create } from 'zustand';
+import { unregisterPushToken } from '@/features/notifications/api';
+import { firebaseAuth, onAuthStateChanged } from '@/lib/firebase/auth';
 import { createSelectors } from '@/lib/utils';
 
 type AuthState = {
@@ -30,10 +31,12 @@ const _useAuthStore = create<AuthState>((set, get) => ({
         try {
           const idToken = await user.getIdToken();
           get().signIn({ access: idToken, refresh: user.refreshToken });
-        } catch {
+        }
+        catch {
           get().signOut();
         }
-      } else {
+      }
+      else {
         get().signOut();
       }
     });
@@ -42,9 +45,14 @@ const _useAuthStore = create<AuthState>((set, get) => ({
 
 export const useAuthStore = createSelectors(_useAuthStore);
 
-export const signOut = () => {
-  firebaseSignOut(firebaseAuth).catch(console.error);
-  _useAuthStore.getState().signOut();
-};
+export function signOut() {
+  // Drop this device's push token while still authenticated, then sign out.
+  unregisterPushToken()
+    .catch(() => {})
+    .finally(() => {
+      firebaseSignOut(firebaseAuth).catch(console.error);
+      _useAuthStore.getState().signOut();
+    });
+}
 export const signIn = (token: TokenType) => _useAuthStore.getState().signIn(token);
 export const hydrateAuth = () => _useAuthStore.getState().hydrate();

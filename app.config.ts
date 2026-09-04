@@ -1,6 +1,6 @@
 import type { ConfigContext, ExpoConfig } from '@expo/config';
 import type { ConfigPlugin } from '@expo/config-plugins';
-import { withDangerousMod } from '@expo/config-plugins';
+import { withAndroidStyles, withDangerousMod } from '@expo/config-plugins';
 
 import type { AppIconBadgeConfig } from 'app-icon-badge/types';
 
@@ -16,6 +16,71 @@ function semverToVersionCode(version: string): number {
   const [major = 0, minor = 0, patch = 0] = version.split('.').map(Number);
   return major * 10000 + minor * 100 + patch;
 }
+
+// Android 12+ forces the OS splash to a centered icon — it can't show a
+// full-bleed image. This makes splash-bg.png the window background of the
+// post-splash theme (AppTheme) so the full artwork covers the screen the
+// instant the OS icon splash dismisses, right up until <CustomSplashScreen>
+// takes over in JS. Two steps: write the drawable + copy the art (dangerous
+// mod, new files only), then point AppTheme at it (styles mod, so it survives
+// expo-splash-screen's own styles edits).
+const withFullscreenAndroidSplash: ConfigPlugin = (config) => {
+  config = withDangerousMod(config, [
+    'android',
+    (c) => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const fs = require('fs') as typeof import('fs');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const path = require('path') as typeof import('path');
+
+      const resDir = path.join(
+        c.modRequest.platformProjectRoot,
+        'app', 'src', 'main', 'res',
+      );
+
+      const drawableDir = path.join(resDir, 'drawable');
+      fs.mkdirSync(drawableDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(drawableDir, 'splashscreen_fullscreen.xml'),
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+          + '<layer-list xmlns:android="http://schemas.android.com/apk/res/android">\n'
+          + '    <item android:drawable="@color/splashscreen_background" />\n'
+          + '    <item>\n'
+          + '        <bitmap android:src="@drawable/splashscreen_fullscreen_img" android:gravity="fill" />\n'
+          + '    </item>\n'
+          + '</layer-list>\n',
+      );
+
+      const nodpiDir = path.join(resDir, 'drawable-nodpi');
+      fs.mkdirSync(nodpiDir, { recursive: true });
+      fs.copyFileSync(
+        path.join(c.modRequest.projectRoot, 'assets', 'splash-bg.png'),
+        path.join(nodpiDir, 'splashscreen_fullscreen_img.png'),
+      );
+
+      return c;
+    },
+  ]);
+
+  config = withAndroidStyles(config, (c) => {
+    const styles = c.modResults;
+    const appTheme = styles.resources.style?.find(
+      (st) => st.$.name === 'AppTheme',
+    );
+    if (appTheme) {
+      appTheme.item = appTheme.item.filter(
+        (it) => it.$.name !== 'android:windowBackground',
+      );
+      appTheme.item.push({
+        $: { name: 'android:windowBackground' },
+        _: '@drawable/splashscreen_fullscreen',
+      });
+    }
+    return c;
+  });
+
+  return config;
+};
 
 const EXPO_ACCOUNT_OWNER = 'obytes';
 const EAS_PROJECT_ID = 'c3e1075b-6fe7-4686-aa49-35b46a229044';
@@ -128,6 +193,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     'expo-localization',
     [
+      'expo-notifications',
+      {
+        color: '#004cca',
+      },
+    ],
+    [
       'expo-location',
       {
         locationWhenInUsePermission:
@@ -159,7 +230,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           return c;
         },
       ]),
-  ],
+    withFullscreenAndroidSplash,
+  ] as ExpoConfig['plugins'],
   extra: {
     eas: {
       projectId: EAS_PROJECT_ID,

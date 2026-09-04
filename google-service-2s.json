@@ -23,24 +23,16 @@
           }
         },
         {
-          "client_id": "1072473959382-kp3gohk5r28982qpuotb8b0rdkgmfkiu.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.uran",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
-          }
-        },
-        {
           "client_id": "1072473959382-05nieql9ilr2r3aoo0i53a8ko6eefcts.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCATW6KBDfOOA2e3-csZBnHvplTJVRyXII"
+          "current_key": "AIzaSyAL3N99Hj5B5QXlqG9UW11Cy5VzoziSubA"
         },
         {
-          "current_key": "AIzaSyAL3N99Hj5B5QXlqG9UW11Cy5VzoziSubA"
+          "current_key": "AIzaSyCATW6KBDfOOA2e3-csZBnHvplTJVRyXII"
         }
       ],
       "services": {
@@ -71,11 +63,11 @@
           }
         },
         {
-          "client_id": "1072473959382-bgu4ps7ispfsdmhb342gokgctlsagg75.apps.googleusercontent.com",
+          "client_id": "1072473959382-gn70uahtd4q5cna3n1rd29rtligi6f7c.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.uran.development",
-            "certificate_hash": "b00c249fe7ad1ed864602e3b46994165b0513de8"
+            "certificate_hash": "f34ec2fa262b33d3349c9c5e2058866af746422c"
           }
         },
         {
@@ -85,10 +77,10 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCATW6KBDfOOA2e3-csZBnHvplTJVRyXII"
+          "current_key": "AIzaSyAL3N99Hj5B5QXlqG9UW11Cy5VzoziSubA"
         },
         {
-          "current_key": "AIzaSyAL3N99Hj5B5QXlqG9UW11Cy5VzoziSubA"
+          "current_key": "AIzaSyCATW6KBDfOOA2e3-csZBnHvplTJVRyXII"
         }
       ],
       "services": {

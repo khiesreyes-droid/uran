@@ -1,5 +1,5 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { onValueCreated } from 'firebase-functions/v2/database';
+import { onValueCreated, onValueWritten } from 'firebase-functions/v2/database';
 import { defineSecret } from 'firebase-functions/params';
 import * as admin from 'firebase-admin';
 
@@ -157,5 +157,97 @@ export const forecastOnDeviceCreate = onValueCreated(
     if (!device) return;
     console.log(`New device ${event.params.deviceId} for uid ${event.params.uid} — fetching forecast`);
     await fetchForecastForDevice(device, TOMORROW_API_KEY.value());
+  }
+);
+
+// ─── Push notification on device_status change ───────────────────────────────
+// Fires when devices/{deviceId}/latest/device_status changes, and pushes to
+// every mobile linked to that device. "Linked" = the deviceId appears under
+// users/{uid}/devices (option A: scan users, no reverse index maintained).
+// FCM tokens live at users/{uid}/pushTokens/{token} (written by the app).
+
+function humanizeStatus(status: string): string {
+  const s = status.trim();
+  if (!s) return 'updated';
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+const PRUNE_ERROR_CODES = new Set([
+  'messaging/registration-token-not-registered',
+  'messaging/invalid-registration-token',
+  'messaging/invalid-argument',
+]);
+
+export const notifyOnDeviceStatus = onValueWritten(
+  '/devices/{deviceId}/latest/device_status',
+  async (event) => {
+    const before = event.data.before.val() as string | null;
+    const after = event.data.after.val() as string | null;
+
+    if (after == null || after === before) return;
+
+    const { deviceId } = event.params;
+    const db = admin.database();
+
+    const usersSnap = await db.ref('users').once('value');
+    const usersVal = usersSnap.val() as Record<
+      string,
+      {
+        devices?: Record<string, unknown>;
+        pushTokens?: Record<string, unknown>;
+      }
+    > | null;
+    if (!usersVal) return;
+
+    // token -> set of uids that hold it (for targeted cleanup on failure)
+    const tokenOwners = new Map<string, Set<string>>();
+    for (const [uid, userData] of Object.entries(usersVal)) {
+      if (!userData.devices || !(deviceId in userData.devices)) continue;
+      for (const token of Object.keys(userData.pushTokens ?? {})) {
+        const owners = tokenOwners.get(token) ?? new Set<string>();
+        owners.add(uid);
+        tokenOwners.set(token, owners);
+      }
+    }
+
+    const tokens = [...tokenOwners.keys()];
+    if (tokens.length === 0) {
+      console.log(`device_status ${deviceId}: no linked push tokens`);
+      return;
+    }
+
+    const status = humanizeStatus(after);
+    const response = await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: {
+        title: 'Shield status changed',
+        body: `${deviceId} is now ${status}`,
+      },
+      data: {
+        deviceId,
+        device_status: after,
+        type: 'device_status',
+      },
+      android: { priority: 'high' },
+      apns: { payload: { aps: { sound: 'default' } } },
+    });
+
+    console.log(
+      `device_status ${deviceId} → ${after}: sent ${response.successCount}/${tokens.length}`
+    );
+
+    // Prune tokens FCM rejected as permanently invalid.
+    const removals: Promise<unknown>[] = [];
+    response.responses.forEach((r, i) => {
+      if (r.success) return;
+      const code = r.error?.code ?? '';
+      console.warn(`push failed for token ${i}: ${code}`);
+      if (!PRUNE_ERROR_CODES.has(code)) return;
+      const token = tokens[i];
+      for (const uid of tokenOwners.get(token) ?? []) {
+        removals.push(db.ref(`users/${uid}/pushTokens/${token}`).remove());
+      }
+    });
+    await Promise.all(removals);
   }
 );

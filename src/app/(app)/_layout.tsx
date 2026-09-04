@@ -8,11 +8,14 @@ import {
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
 import { useAuthStore as useAuth } from '@/features/auth/use-auth-store';
+import { usePushNotifications } from '@/features/notifications/use-push-notifications';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
 export default function TabLayout() {
   const status = useAuth.use.status();
   const [isFirstTime] = useIsFirstTime();
+
+  usePushNotifications();
 
   if (isFirstTime) {
     return <Redirect href="/onboarding" />;
