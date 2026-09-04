@@ -1,10 +1,12 @@
 import type { TokenType } from '@/lib/auth/utils';
 
-import { signOut as firebaseSignOut } from 'firebase/auth';
-
 import { create } from 'zustand';
 import { unregisterPushToken } from '@/features/notifications/api';
-import { firebaseAuth, onAuthStateChanged } from '@/lib/firebase/auth';
+import {
+  signOut as authSignOut,
+  firebaseAuth,
+  onAuthStateChanged,
+} from '@/lib/firebase/auth';
 import { createSelectors } from '@/lib/utils';
 
 type AuthState = {
@@ -46,11 +48,12 @@ const _useAuthStore = create<AuthState>((set, get) => ({
 export const useAuthStore = createSelectors(_useAuthStore);
 
 export function signOut() {
-  // Drop this device's push token while still authenticated, then sign out.
+  // Drop this device's push token while still authenticated, then sign out of
+  // both Google (native) and Firebase.
   unregisterPushToken()
     .catch(() => {})
     .finally(() => {
-      firebaseSignOut(firebaseAuth).catch(console.error);
+      authSignOut().catch(console.error);
       _useAuthStore.getState().signOut();
     });
 }

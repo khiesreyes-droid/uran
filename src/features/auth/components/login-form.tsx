@@ -202,7 +202,7 @@ export function LoginForm({ onSubmit = () => {}, onSignUp, onGoogleSignIn, googl
               URAN
             </Text>
             <Text style={[s.logoSubtitle, { color: c.onSurfaceVariant }]}>
-              ATMOSPHERIC SHIELD
+              
             </Text>
           </View>
 

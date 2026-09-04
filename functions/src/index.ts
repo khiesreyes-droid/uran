@@ -255,8 +255,20 @@ export const notifyOnDeviceStatus = onValueWritten(
         device_status: after,
         type: 'device_status',
       },
-      android: { priority: 'high' },
-      apns: { payload: { aps: { sound: 'default' } } },
+      android: {
+        priority: 'high',
+        // Route to the HIGH-importance channel the app creates (see
+        // src/lib/notifications.ts). Without this FCM uses the default channel
+        // and there is no heads-up / lock-screen pop, just a tray entry.
+        notification: { channelId: 'device-status', sound: 'default' },
+        // Collapse superseded status updates that pile up while offline.
+        collapseKey: `device_status_${deviceId}`,
+        ttl: 3600 * 1000,
+      },
+      apns: {
+        headers: { 'apns-priority': '10' },
+        payload: { aps: { sound: 'default' } },
+      },
     });
 
     console.log(

@@ -1,18 +1,18 @@
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import {
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  GoogleAuthProvider,
   onAuthStateChanged,
   sendEmailVerification,
   signInWithCredential,
   signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
   updateProfile,
 } from 'firebase/auth';
 
 import { firebaseAuth } from './index';
 
-export { onAuthStateChanged, firebaseAuth };
+export { firebaseAuth, onAuthStateChanged };
 
 GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
@@ -47,21 +47,39 @@ export async function resendVerificationEmail() {
 
 export async function signInWithGoogle() {
   await GoogleSignin.hasPlayServices();
+  // Clear any cached native session first so the account picker always shows —
+  // otherwise a second sign-in after logout silently reuses the old account
+  // (or fails with no UI) because signOut() below was never called natively.
+  await GoogleSignin.signOut().catch(() => {});
   const result = await GoogleSignin.signIn();
   const idToken = result.data?.idToken;
-  if (!idToken) throw new Error('Google Sign-In did not return an ID token');
+  if (!idToken)
+    throw new Error('Google Sign-In did not return an ID token');
   const credential = GoogleAuthProvider.credential(idToken);
   const cred = await signInWithCredential(firebaseAuth, credential);
   return cred.user;
 }
 
 export async function signOut() {
+  // Drop the native Google session too, not just the Firebase one.
+  await GoogleSignin.signOut().catch(() => {});
   await firebaseSignOut(firebaseAuth);
 }
 
 export function getAuthErrorMessage(error: unknown): string {
   const code = (error as any)?.code as string | undefined;
   switch (code) {
+    // @react-native-google-signin status codes
+    case 'SIGN_IN_CANCELLED':
+    case '-5':
+      return 'Sign-in was cancelled';
+    case 'IN_PROGRESS':
+      return 'Sign-in is already in progress';
+    case 'PLAY_SERVICES_NOT_AVAILABLE':
+      return 'Google Play services is missing or outdated on this device';
+    case 'DEVELOPER_ERROR':
+    case '10':
+      return 'Google Sign-In is misconfigured for this build (SHA-1 / client ID)';
     case 'auth/user-not-found':
       return 'No account found with this email';
     case 'auth/wrong-password':

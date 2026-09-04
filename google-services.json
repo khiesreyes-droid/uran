@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "1072473959382-6inpejl4q9lspp2vjeof2ivkj79ghcv3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.uran",
+            "certificate_hash": "f39481f029c97f96bfd5bc27490c857b17327811"
+          }
+        },
+        {
           "client_id": "1072473959382-kp3gohk5r28982qpuotb8b0rdkgmfkiu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
