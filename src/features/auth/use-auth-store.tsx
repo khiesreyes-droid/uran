@@ -29,16 +29,29 @@ const _useAuthStore = create<AuthState>((set, get) => ({
   hydrate: () => {
     // Firebase fires this immediately with the persisted user (or null)
     onAuthStateChanged(firebaseAuth, async (user) => {
-      if (user && user.emailVerified) {
+      // Google (and other federated) providers assert the email themselves, so
+      // user.emailVerified can be false for them even though the address is
+      // trustworthy. Only the email/password path needs the explicit check.
+      const viaFederatedProvider = !!user?.providerData.some(
+        p => p.providerId !== 'password',
+      );
+      if (user && (user.emailVerified || viaFederatedProvider)) {
         try {
           const idToken = await user.getIdToken();
           get().signIn({ access: idToken, refresh: user.refreshToken });
         }
-        catch {
+        catch (err) {
+          console.error('[auth] getIdToken failed, signing out:', err);
           get().signOut();
         }
       }
       else {
+        console.log(
+          '[auth] signing out — user:',
+          !!user,
+          'emailVerified:',
+          user?.emailVerified,
+        );
         get().signOut();
       }
     });

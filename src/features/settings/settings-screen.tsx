@@ -11,6 +11,7 @@ import {
 } from '@/components/ui';
 import { Github, Rate, Share, Support, Website } from '@/components/ui/icons';
 import { useAuthStore as useAuth } from '@/features/auth/use-auth-store';
+import { firebaseAuth } from '@/lib/firebase/auth';
 import { translate } from '@/lib/i18n';
 import { LanguageItem } from './components/language-item';
 import { SettingsContainer } from './components/settings-container';
@@ -19,6 +20,9 @@ import { ThemeItem } from './components/theme-item';
 
 export function SettingsScreen() {
   const signOut = useAuth.use.signOut();
+  // Re-read the current user whenever auth status changes.
+  const status = useAuth.use.status();
+  const email = status === 'signIn' ? firebaseAuth.currentUser?.email : undefined;
   const router = useRouter();
   const { theme } = useUniwind();
   const iconColor
@@ -32,6 +36,10 @@ export function SettingsScreen() {
           <Text className="text-xl font-bold">
             {translate('settings.title')}
           </Text>
+          <SettingsContainer title="settings.account">
+            <SettingsItem text="settings.email" value={email ?? '—'} />
+          </SettingsContainer>
+
           <SettingsContainer title="settings.generale">
             <LanguageItem />
             <ThemeItem />

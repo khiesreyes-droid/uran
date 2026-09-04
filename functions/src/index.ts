@@ -220,73 +220,88 @@ export const notifyOnDeviceStatus = onValueWritten(
     const usersVal = usersSnap.val() as Record<
       string,
       {
-        devices?: Record<string, unknown>;
+        devices?: Record<string, { name?: string } | null>;
         pushTokens?: Record<string, unknown>;
       }
     > | null;
     if (!usersVal) return;
 
-    // token -> set of uids that hold it (for targeted cleanup on failure)
-    const tokenOwners = new Map<string, Set<string>>();
+    // token -> { owners (uids, for cleanup), display name from that user's
+    // own device entry }. Different users may name the same device differently.
+    const perToken = new Map<string, { owners: Set<string>; name: string }>();
     for (const [uid, userData] of Object.entries(usersVal)) {
       if (!userData.devices || !(deviceId in userData.devices)) continue;
+      const name = userData.devices[deviceId]?.name?.trim() || deviceId;
       for (const token of Object.keys(userData.pushTokens ?? {})) {
-        const owners = tokenOwners.get(token) ?? new Set<string>();
-        owners.add(uid);
-        tokenOwners.set(token, owners);
+        const existing = perToken.get(token);
+        if (existing) existing.owners.add(uid);
+        else perToken.set(token, { owners: new Set([uid]), name });
       }
     }
 
-    const tokens = [...tokenOwners.keys()];
-    if (tokens.length === 0) {
+    if (perToken.size === 0) {
       console.log(`device_status ${deviceId}: no linked push tokens`);
       return;
     }
 
     const status = humanizeStatus(after);
-    const response = await admin.messaging().sendEachForMulticast({
-      tokens,
-      notification: {
-        title: 'Shield status changed',
-        body: `${deviceId} is now ${status}`,
-      },
-      data: {
-        deviceId,
-        device_status: after,
-        type: 'device_status',
-      },
-      android: {
-        priority: 'high',
-        // Route to the HIGH-importance channel the app creates (see
-        // src/lib/notifications.ts). Without this FCM uses the default channel
-        // and there is no heads-up / lock-screen pop, just a tray entry.
-        notification: { channelId: 'device-status', sound: 'default' },
-        // Collapse superseded status updates that pile up while offline.
-        collapseKey: `device_status_${deviceId}`,
-        ttl: 3600 * 1000,
-      },
-      apns: {
-        headers: { 'apns-priority': '10' },
-        payload: { aps: { sound: 'default' } },
-      },
-    });
 
-    console.log(
-      `device_status ${deviceId} → ${after}: sent ${response.successCount}/${tokens.length}`
-    );
+    // Group tokens by the name to show (almost always a single group).
+    const tokensByName = new Map<string, string[]>();
+    for (const [token, { name }] of perToken) {
+      const arr = tokensByName.get(name);
+      if (arr) arr.push(token);
+      else tokensByName.set(name, [token]);
+    }
 
-    // Prune tokens FCM rejected as permanently invalid.
+    let sent = 0;
+    let total = 0;
     const removals: Promise<unknown>[] = [];
-    response.responses.forEach((r, i) => {
-      if (r.success) return;
-      const code = r.error?.code ?? '';
-      console.warn(`push failed for token ${i}: ${code}`);
-      if (!PRUNE_ERROR_CODES.has(code)) return;
-      const token = tokens[i];
-      for (const uid of tokenOwners.get(token) ?? []) {
-        removals.push(db.ref(`users/${uid}/pushTokens/${token}`).remove());
-      }
-    });
+
+    for (const [name, tokens] of tokensByName) {
+      total += tokens.length;
+      const response = await admin.messaging().sendEachForMulticast({
+        tokens,
+        notification: {
+          title: 'Shield status changed',
+          body: `${name} is now ${status}`,
+        },
+        data: {
+          deviceId,
+          device_status: after,
+          type: 'device_status',
+        },
+        android: {
+          priority: 'high',
+          // Route to the HIGH-importance channel the app creates (see
+          // src/lib/notifications.ts). Without this FCM uses the default channel
+          // and there is no heads-up / lock-screen pop, just a tray entry.
+          notification: { channelId: 'device-status', sound: 'default' },
+          // Collapse superseded status updates that pile up while offline.
+          collapseKey: `device_status_${deviceId}`,
+          ttl: 3600 * 1000,
+        },
+        apns: {
+          headers: { 'apns-priority': '10' },
+          payload: { aps: { sound: 'default' } },
+        },
+      });
+      sent += response.successCount;
+
+      // Prune tokens FCM rejected as permanently invalid.
+      response.responses.forEach((r, i) => {
+        if (r.success) return;
+        const code = r.error?.code ?? '';
+        console.warn(`push failed for token ${i}: ${code}`);
+        if (!PRUNE_ERROR_CODES.has(code)) return;
+        const token = tokens[i];
+        for (const uid of perToken.get(token)?.owners ?? []) {
+          removals.push(db.ref(`users/${uid}/pushTokens/${token}`).remove());
+        }
+      });
+    }
+
+    console.log(`device_status ${deviceId} → ${after}: sent ${sent}/${total}`);
     await Promise.all(removals);
   }
 );
