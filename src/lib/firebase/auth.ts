@@ -15,7 +15,11 @@ import { firebaseAuth } from './index';
 export { firebaseAuth, onAuthStateChanged };
 
 GoogleSignin.configure({
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  // 'autoDetect' reads default_web_client_id from google-services.json at
+  // runtime — no reliance on EXPO_PUBLIC_* being inlined into the release
+  // bundle. Falls back to the env var if that ever fails to resolve.
+  webClientId:
+    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? 'autoDetect',
 });
 
 export async function signUpWithEmail(name: string, email: string, password: string) {
