@@ -134,6 +134,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     package: Env.EXPO_PUBLIC_PACKAGE,
     versionCode: semverToVersionCode(Env.EXPO_PUBLIC_VERSION),
+    // Wires google-services.json into the build AND applies the
+    // com.google.gms.google-services Gradle plugin — required for the native
+    // Firebase SDK to auto-initialize (expo-notifications FCM token retrieval,
+    // native Google Sign-In). Without the plugin the JSON is just dead weight.
+    googleServicesFile: './google-services.json',
   },
   web: {
     favicon: './assets/favicon.png',
@@ -216,20 +221,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ['@react-native-google-signin/google-signin'],
-    (config: ExpoConfig) =>
-      withDangerousMod(config as Parameters<ConfigPlugin>[0], [
-        'android',
-        (c) => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const fs = require('fs') as typeof import('fs');
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const path = require('path') as typeof import('path');
-          const src = path.join(c.modRequest.projectRoot, 'google-services.json');
-          const dest = path.join(c.modRequest.platformProjectRoot, 'app', 'google-services.json');
-          if (fs.existsSync(src)) fs.copyFileSync(src, dest);
-          return c;
-        },
-      ]),
+    // google-services.json is now wired via android.googleServicesFile above,
+    // which also applies the com.google.gms.google-services Gradle plugin.
     withFullscreenAndroidSplash,
   ] as ExpoConfig['plugins'],
   extra: {

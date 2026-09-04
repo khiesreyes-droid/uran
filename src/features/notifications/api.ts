@@ -17,13 +17,26 @@ function isSafeKey(token: string): boolean {
 
 export async function savePushToken({ token, platform }: PushToken): Promise<void> {
   const uid = firebaseAuth.currentUser?.uid;
-  if (!uid || !isSafeKey(token))
+  if (!uid) {
+    console.warn('[push] savePushToken: no authenticated user');
     return;
+  }
+  if (!isSafeKey(token)) {
+    console.warn('[push] savePushToken: token has RTDB-unsafe chars, skipping');
+    return;
+  }
 
-  await set(ref(firebaseDatabase, `users/${uid}/pushTokens/${token}`), {
-    platform,
-    updatedAt: serverTimestamp(),
-  });
+  try {
+    await set(ref(firebaseDatabase, `users/${uid}/pushTokens/${token}`), {
+      platform,
+      updatedAt: serverTimestamp(),
+    });
+    console.log('[push] token saved to users/%s/pushTokens', uid);
+  }
+  catch (err) {
+    console.error('[push] savePushToken write failed:', err);
+    throw err;
+  }
 
   storage.set(LAST_TOKEN_KEY, token);
   storage.set(LAST_UID_KEY, uid);

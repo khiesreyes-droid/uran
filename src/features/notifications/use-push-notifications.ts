@@ -25,9 +25,11 @@ export function usePushNotifications(): void {
       return;
     registered.current = true;
 
+    console.log('[push] signed in — registering for notifications');
     registerForPushNotificationsAsync()
       .then(result => (result ? savePushToken(result) : undefined))
-      .catch(() => {
+      .catch((err) => {
+        console.error('[push] registration failed:', err);
         registered.current = false;
       });
   }, [status]);

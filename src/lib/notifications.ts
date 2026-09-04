@@ -43,8 +43,10 @@ export type PushToken = {
  * Returns null when running on a simulator or when permission is denied.
  */
 export async function registerForPushNotificationsAsync(): Promise<PushToken | null> {
-  if (!Device.isDevice)
+  if (!Device.isDevice) {
+    console.warn('[push] not a physical device — skipping registration');
     return null;
+  }
 
   await ensureAndroidChannel();
 
@@ -54,14 +56,19 @@ export async function registerForPushNotificationsAsync(): Promise<PushToken | n
     const req = await Notifications.requestPermissionsAsync();
     status = req.status;
   }
-  if (status !== 'granted')
+  console.log('[push] notification permission:', status);
+  if (status !== 'granted') {
+    console.warn('[push] permission not granted — no token will be saved');
     return null;
+  }
 
   try {
     const { data } = await Notifications.getDevicePushTokenAsync();
+    console.log('[push] got device push token:', `${String(data).slice(0, 24)}…`);
     return { token: data, platform: Platform.OS === 'ios' ? 'ios' : 'android' };
   }
-  catch {
+  catch (err) {
+    console.error('[push] getDevicePushTokenAsync failed:', err);
     return null;
   }
 }
