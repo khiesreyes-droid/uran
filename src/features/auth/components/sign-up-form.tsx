@@ -264,7 +264,7 @@ export function SignUpForm({ onSubmit = () => {}, onLogin, onGoogleSignIn, googl
             >
               <GridIcon color={c.primary} />
             </View>
-            <Text style={[s.logoTitle, { color: c.onSurface }]}>URAN</Text>
+            <Text style={[s.logoTitle, { color: c.onSurface }]}>Frandify</Text>
             <Text style={[s.logoSubtitle, { color: c.onSurfaceVariant }]}>
               ATMOSPHERIC SHIELD
             </Text>

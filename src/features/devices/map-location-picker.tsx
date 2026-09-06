@@ -116,7 +116,7 @@ export function MapLocationPicker({
     setSearching(true);
     try {
       const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query.trim())}&format=json&limit=5`;
-      const res = await fetch(url, { headers: { 'User-Agent': 'UranApp/1.0' } });
+      const res = await fetch(url, { headers: { 'User-Agent': 'FrandifyApp/1.0' } });
       const data: NominatimResult[] = await res.json();
       setSearchResults(data);
     } catch {

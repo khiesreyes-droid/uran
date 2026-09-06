@@ -199,7 +199,7 @@ export function LoginForm({ onSubmit = () => {}, onSignUp, onGoogleSignIn, googl
               <GridIcon color={c.primary} />
             </View>
             <Text testID="form-title" style={[s.logoTitle, { color: c.onSurface }]}>
-              URAN
+              Frandify
             </Text>
             <Text style={[s.logoSubtitle, { color: c.onSurfaceVariant }]}>
               

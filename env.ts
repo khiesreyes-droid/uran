@@ -51,7 +51,10 @@ const SCHEMES = {
   production: 'uran',
 } as const;
 
-const NAME = 'uran';
+// Launcher / display name (android:label, CFBundleDisplayName). Independent of
+// the package name (com.uran) — safe to change without touching Firebase,
+// Google OAuth, SHA-1s or FCM, which are all keyed to the package.
+const NAME = 'Frandify';
 
 // Check if strict validation is required (before prebuild)
 const STRICT_ENV_VALIDATION = process.env.STRICT_ENV_VALIDATION === '1';
