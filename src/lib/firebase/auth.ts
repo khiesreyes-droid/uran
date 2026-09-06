@@ -55,12 +55,23 @@ export async function signInWithGoogle() {
   // otherwise a second sign-in after logout silently reuses the old account
   // (or fails with no UI) because signOut() below was never called natively.
   await GoogleSignin.signOut().catch(() => {});
+
   const result = await GoogleSignin.signIn();
-  const idToken = result.data?.idToken;
+  let idToken = result.data?.idToken ?? null;
+  console.log('[GSI] signIn result idToken present:', !!idToken);
+
+  if (!idToken) {
+    // On repeat sign-ins Google can return the account without a fresh
+    // idToken — getTokens() forces one.
+    idToken = (await GoogleSignin.getTokens()).idToken ?? null;
+    console.log('[GSI] getTokens fallback idToken present:', !!idToken);
+  }
   if (!idToken)
     throw new Error('Google Sign-In did not return an ID token');
+
   const credential = GoogleAuthProvider.credential(idToken);
   const cred = await signInWithCredential(firebaseAuth, credential);
+  console.log('[GSI] firebase signInWithCredential ok, uid:', cred.user.uid);
   return cred.user;
 }
 
