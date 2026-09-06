@@ -60,15 +60,31 @@ const _useAuthStore = create<AuthState>((set, get) => ({
 
 export const useAuthStore = createSelectors(_useAuthStore);
 
+/**
+ * Explicitly move the store to 'signIn' after a successful sign-in action.
+ * We can't rely on onAuthStateChanged alone: re-signing-in with the same
+ * account it never cleared does not re-fire the listener, so status would stay
+ * 'signOut' and the app would bounce back to /login.
+ */
+export async function completeSignIn(user: {
+  getIdToken: () => Promise<string>;
+  refreshToken: string;
+}) {
+  try {
+    const idToken = await user.getIdToken();
+    _useAuthStore.getState().signIn({ access: idToken, refresh: user.refreshToken });
+  }
+  catch (err) {
+    console.error('[auth] completeSignIn failed:', err);
+    _useAuthStore.getState().signOut();
+  }
+}
+
 export function signOut() {
-  // Drop this device's push token while still authenticated, then sign out of
-  // both Google (native) and Firebase.
-  unregisterPushToken()
-    .catch(() => {})
-    .finally(() => {
-      authSignOut().catch(console.error);
-      _useAuthStore.getState().signOut();
-    });
+  // Update the UI immediately, then tear down Google + Firebase sessions.
+  _useAuthStore.getState().signOut();
+  unregisterPushToken().catch(() => {});
+  authSignOut().catch(err => console.error('[auth] signOut error:', err));
 }
 export const signIn = (token: TokenType) => _useAuthStore.getState().signIn(token);
 export const hydrateAuth = () => _useAuthStore.getState().hydrate();

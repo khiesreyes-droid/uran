@@ -5,7 +5,7 @@ import * as React from 'react';
 import { showMessage } from 'react-native-flash-message';
 
 import { FocusAwareStatusBar } from '@/components/ui';
-import { useAuthStore } from '@/features/auth/use-auth-store';
+import { completeSignIn, useAuthStore } from '@/features/auth/use-auth-store';
 import {
   getAuthErrorMessage,
   signInWithGoogle,
@@ -28,7 +28,8 @@ export function SignUpScreen() {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+      await completeSignIn(user);
       router.replace('/');
     }
     catch (error) {

@@ -14,6 +14,8 @@ import { Cover } from './components/cover';
 export function OnboardingScreen() {
   const [_, setIsFirstTime] = useIsFirstTime();
   const router = useRouter();
+
+  console.log('[nav] OnboardingScreen rendered');
   return (
     <View className="flex h-full items-center justify-center">
       <FocusAwareStatusBar />

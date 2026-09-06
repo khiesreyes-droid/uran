@@ -17,6 +17,8 @@ export default function TabLayout() {
 
   usePushNotifications();
 
+  console.log('[nav] TabLayout — isFirstTime:', isFirstTime, 'status:', status);
+
   if (isFirstTime) {
     return <Redirect href="/onboarding" />;
   }

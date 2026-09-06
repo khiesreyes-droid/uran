@@ -5,7 +5,7 @@ import * as React from 'react';
 import { showMessage } from 'react-native-flash-message';
 
 import { FocusAwareStatusBar } from '@/components/ui';
-import { useAuthStore } from '@/features/auth/use-auth-store';
+import { completeSignIn, useAuthStore } from '@/features/auth/use-auth-store';
 import {
   getAuthErrorMessage,
   signInWithEmail,
@@ -19,6 +19,8 @@ export function LoginScreen() {
   const status = useAuthStore.use.status();
   const [googleLoading, setGoogleLoading] = React.useState(false);
 
+  console.log('[nav] LoginScreen — status:', status);
+
   // onAuthStateChanged drives status → 'signIn' after a successful login.
   // Redirect from here so we don't depend on router.replace winning the race
   // against that async callback (which it loses when arriving from a logout).
@@ -29,7 +31,8 @@ export function LoginScreen() {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+      await completeSignIn(user);
       router.replace('/');
     }
     catch (error) {
@@ -45,7 +48,8 @@ export function LoginScreen() {
 
   const onSubmit: LoginFormProps['onSubmit'] = async (data) => {
     try {
-      await signInWithEmail(data.email, data.password);
+      const user = await signInWithEmail(data.email, data.password);
+      await completeSignIn(user);
       router.replace('/');
     }
     catch (error) {

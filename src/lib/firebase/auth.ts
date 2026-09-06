@@ -76,9 +76,11 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
-  // Drop the native Google session too, not just the Firebase one.
-  await GoogleSignin.signOut().catch(() => {});
+  // Firebase first and unconditionally — a hung/failed GoogleSignin.signOut()
+  // must not leave the Firebase session alive (which then blocks the next
+  // sign-in from firing onAuthStateChanged).
   await firebaseSignOut(firebaseAuth);
+  GoogleSignin.signOut().catch(() => {});
 }
 
 export function getAuthErrorMessage(error: unknown): string {
